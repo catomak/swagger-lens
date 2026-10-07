@@ -68,7 +68,7 @@ async function main() {
       const entry = { target, status: 'running', runtime: 'not-run' };
       report.targets.push(entry);
       const stage = target === host ? hostStage : await stageTarget(target);
-      const vsix = path.join(root, 'builds', `${packageJson.name}-${packageJson.version}-${target}.vsix`);
+      const vsix = path.join(root, 'builds', `${packageJson.name}-${packageJson.version}-${targetConfig(target).artifactTarget}.vsix`);
       await createVSIX({ cwd: stage, target, packagePath: vsix, dependencies: false });
       entry.package = await verifyVsix(vsix, target, stage);
       entry.vsix = path.relative(root, vsix);

@@ -62,20 +62,22 @@ npm test
 
 ## GitHub Actions
 
+macOS packages use `macos-arm64` and `macos-x64` in filenames and artifact labels. Their VSIX metadata and release command targets remain `darwin-arm64` and `darwin-x64`, as required by VS Code.
+
 The workflow is `.github/workflows/build.yml`. Add the source project, including `package-lock.json`, to a GitHub repository. No repository or upload is created by the local release command.
 
 The workflow runs on pull requests, pushes to `main`/`master`, version tags beginning with `v`, and manual **Actions → Build and test VSIX → Run workflow**. It uses six independent native runners:
 
-| Package target | GitHub-hosted runner |
-| --- | --- |
-| `darwin-arm64` | `macos-15` |
-| `darwin-x64` | `macos-15-intel` |
-| `win32-x64` | `windows-2025` |
-| `win32-arm64` | `windows-11-arm` |
-| `linux-x64` | `ubuntu-24.04` |
-| `linux-arm64` | `ubuntu-24.04-arm` |
+| Filename suffix | VS Code target | GitHub-hosted runner |
+| --- | --- | --- |
+| `macos-arm64` | `darwin-arm64` | `macos-15` |
+| `macos-x64` | `darwin-x64` | `macos-15-intel` |
+| `win32-x64` | `win32-x64` | `windows-2025` |
+| `win32-arm64` | `win32-arm64` | `windows-11-arm` |
+| `linux-x64` | `linux-x64` | `ubuntu-24.04` |
+| `linux-arm64` | `linux-arm64` | `ubuntu-24.04-arm` |
 
-Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<target>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Packages are not published to the Marketplace.
+Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<filename-suffix>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Packages are not published to the Marketplace.
 
 All six standard runners are listed for public and private repositories. Standard hosted-runner usage is free for public repositories. Private repositories use the account's included minutes and then incur charges. See GitHub's [runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) and [billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 

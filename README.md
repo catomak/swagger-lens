@@ -6,7 +6,7 @@ Source and issues: [catomak/swagger-lens](https://github.com/catomak/swagger-len
 
 ## Usage
 
-1. Install the VSIX for your OS and architecture: Extensions → `…` menu → Install from VSIX. Locally built packages are written to `builds/`; GitHub Actions uploads tested packages as workflow artifacts.
+1. Install the VSIX for your OS and architecture: Extensions → `…` menu → Install from VSIX. Locally built packages are written to `builds/`; GitHub Actions uploads tested packages as workflow artifacts. macOS filenames use `macos-arm64` for Apple Silicon and `macos-x64` for Intel.
 2. Open a saved OpenAPI JSON or YAML file.
 3. Click the preview button on the right of the editor title. The command is also available as **Swagger Lens: Open Swagger Preview** and in the file's context menu.
 4. An ordinary editor opens **Swagger Preview**: the full current contract, schemas, server selection, authorization, and **Try it out**. The **Preview | Diffs** control in the top toolbar selects the mode; its inactive half is dimmed but remains clickable. The **Changes only** checkbox is enabled in Diffs. Preview works outside Git, with the Diffs button disabled.

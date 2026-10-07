@@ -4,6 +4,8 @@ A brief history of project changes, with the latest entries first.
 
 ## Unreleased
 
+- Use `macos-arm64` and `macos-x64` in VSIX filenames and CI artifact labels; preserve the required `darwin-*` target metadata.
+
 ## 0.3.8 — 2026-10-07
 
 - Fixed Windows drive-letter aliases bypassing selective schema imports and duplicating dependencies.

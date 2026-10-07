@@ -12,7 +12,7 @@ function targetConfig(target) {
   const [platform, arch] = target.split('-');
   const key = platform === 'darwin' ? 'darwin_all' : `${platform === 'win32' ? 'windows' : 'linux'}_${arch === 'x64' ? 'amd64' : 'arm64'}`;
   const archive = `oasdiff_${version}_${key}.tar.gz`;
-  return { target, platform, arch, binary: executableName(platform), archive, sha256: archives[key], url: `https://github.com/oasdiff/oasdiff/releases/download/v${version}/${archive}` };
+  return { target, artifactTarget: target.replace(/^darwin-/, 'macos-'), platform, arch, binary: executableName(platform), archive, sha256: archives[key], url: `https://github.com/oasdiff/oasdiff/releases/download/v${version}/${archive}` };
 }
 
 function verifyBinary(data, target) {
