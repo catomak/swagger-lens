@@ -21,8 +21,8 @@ Prepared for Swagger Lens 0.3.8 on 2026-10-07. Checked items describe local evid
 
 ## Validation
 
-- [ ] Confirm 62 unit tests and 14 installed-VSIX webview scenarios pass on every native target with VS Code stable. Windows drive aliases have explicit regression coverage; standalone fixtures run outside the checkout.
-- [ ] Test the installed package against the declared minimum VS Code version, 1.90.0.
+- [ ] Confirm 66 unit tests and 14 installed-VSIX webview scenarios pass on every native target with VS Code stable. Windows drive aliases have explicit regression coverage; standalone fixtures run outside the checkout.
+- [x] All 14 installed-VSIX scenarios pass on macOS ARM64 against the declared minimum VS Code version, 1.90.0, and stable 1.141.0.
 - [ ] Obtain successful native CI results for macOS Intel/ARM64, Windows x64/ARM64, and Linux x64/ARM64. Cross-packaging alone does not confirm foreign-platform runtime behavior.
 - [x] Production dependency audit reviewed on 2026-10-07: no high or critical findings; five moderate package entries refer to one [sprintf-js advisory](https://github.com/advisories/GHSA-hp3w-g68c-fv3c), with no patched version. `sprintf-js` and `argparse` are excluded from both bundle input graphs; Remarkable's browser entry excludes its CLI dependency. The shipped prebuilt Swagger UI and Remarkable browser bundles contain no references to that dependency or its affected number-formatting calls. The dependency finding remains in the development install and must be reviewed again when dependencies change.
 - [x] Project source/documentation scan found no private absolute paths, private keys, or common token formats. Test API data is synthetic; caches, binaries, builds, and test logs are excluded from Git.

@@ -7,6 +7,7 @@ A brief history of project changes, with the latest entries first.
 ## 0.3.8 — 2026-10-07
 
 - Fixed Windows drive-letter aliases bypassing selective schema imports and duplicating dependencies.
+- Follow the official Windows VS Code launcher when locating its CLI, including versioned application directories.
 - Isolated installed-VSIX fixtures from the project repository and waited for final preview state when test actions overlap automatic refreshes.
 
 - Published project sources on GitHub and enabled the six-platform build and test workflow.

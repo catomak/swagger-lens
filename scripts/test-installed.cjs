@@ -4,6 +4,7 @@ const os = require('node:os');
 const { downloadAndUnzipVSCode, runTests } = require('@vscode/test-electron');
 const { run } = require('./process.cjs');
 const { nativeTarget } = require('./targets.cjs');
+const { resolveCliScript } = require('./vscode-cli.cjs');
 
 async function testInstalled(vsix, target, root) {
   if (target !== nativeTarget()) throw new Error(`Native VS Code tests for ${target} require that OS and architecture; current host is ${nativeTarget()}`);
@@ -28,7 +29,7 @@ async function testInstalled(vsix, target, root) {
     profile = await fs.mkdtemp(path.join(os.tmpdir(), 'swg-'));
     const dirs = ['--user-data-dir', profile, '--extensions-dir', extensions];
     // Run the CLI directly to preserve paths with spaces and avoid Windows .cmd shell quoting.
-    const cliScript = path.resolve(path.dirname(executable), process.platform === 'darwin' ? '../Resources/app/out/cli.js' : 'resources/app/out/cli.js');
+    const cliScript = await resolveCliScript(executable);
     await fs.mkdir(path.dirname(report), { recursive: true });
     await fs.rm(report, { force: true });
     await run(executable, [cliScript, ...dirs, '--install-extension', vsix, '--force'], { cwd: root, env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' } });
