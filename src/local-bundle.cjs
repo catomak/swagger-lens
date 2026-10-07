@@ -44,8 +44,12 @@ function project(document, pointers) {
 // Keep original document paths so the mature bundler still handles circular
 // references, aliases and deduplication. Only its input documents are trimmed.
 async function bundleLocal(root, parsed, readDocument, is31) {
+  const rootDrive = root.startsWith('file:') && new URL(root).pathname.match(/^\/([a-z]):/i)?.[1];
   const canonical = source => {
     const url = new URL(/^[a-z]:\//i.test(source) ? `file:///${source}` : source, root);
+    // RefParser lowercases Windows drive letters. Keep the caller's casing
+    // for stable cache keys and dependency paths used by VS Code save events.
+    if (url.protocol === 'file:' && rootDrive) url.pathname = url.pathname.replace(/^\/([a-z]):/i, (_, drive) => `/${rootDrive === rootDrive.toUpperCase() ? drive.toUpperCase() : drive.toLowerCase()}:`);
     const href = url.protocol === 'file:' ? pathToFileURL(fileURLToPath(url)).href : url.href;
     // Unreserved characters have the same URI identity whether encoded or not.
     return href.replace(/%[0-9a-f]{2}/gi, token => {

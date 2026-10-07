@@ -127,10 +127,15 @@ async function runTests() {
   data = api.getPreview(rightIndex).data;
   assert.deepEqual(leaf(data)['x-diff-original'].enum, ['v2']); assert.deepEqual(leaf(data).enum, ['v4']);
   await api.setBase(rightIndex, 'HEAD~1');
+  await waitFor(() => {
+    const state = api.getPreview(rightIndex);
+    return !state.busy && state.data?.baseRef === 'HEAD~1' && state.data.comparisonSource === 'git';
+  }, 'Changing the Git base did not finish loading');
   data = api.getPreview(rightIndex).data;
   assert.equal(data.comparisonSource, 'git');
   assert.deepEqual(leaf(data)['x-diff-original'].enum, ['v1']); assert.deepEqual(leaf(data).enum, ['v4']);
   await api.setMode(rightIndex, 'preview');
+  await waitFor(() => !api.getPreview(rightIndex).busy && api.getPreview(rightIndex).data?.mode === 'preview', 'The index Preview did not finish loading');
   data = api.getPreview(rightIndex).data;
   assert.ok(data.spec.paths['/staged-only']); assert.ok(!data.spec.paths['/working-only']);
   assert.deepEqual(previewEnum(data), ['v4']);
@@ -172,7 +177,7 @@ async function runTests() {
 
   const fragment = vscode.Uri.file(fixture.fragment);
   const compact = await openFile(fragment);
-  assert.deepEqual(compact.dependencies.sort(), [fixture.fragment, fixture.neighbor].sort());
+  assert.deepEqual(compact.dependencies.sort(), [fixture.fragment, fixture.neighbor].map(file => vscode.Uri.file(file).fsPath).sort());
   assert.doesNotMatch(JSON.stringify(compact.spec), /Unused|missing\.json/);
   assert.deepEqual(compact.spec.components.schemas.Envelope.example, { name: 'Asha', active: true, count: 3 });
   await rendered(fragment);

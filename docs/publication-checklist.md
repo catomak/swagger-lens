@@ -1,6 +1,6 @@
 # Publication checklist
 
-Prepared for Swagger Lens 0.3.7 on 2026-10-07. Checked items describe local evidence; unchecked items still need a publishing account or a remote run.
+Prepared for Swagger Lens 0.3.8 on 2026-10-07. Checked items describe local evidence; unchecked items still need a publishing account or a remote run.
 
 ## Identity and repository
 
@@ -10,18 +10,18 @@ Prepared for Swagger Lens 0.3.7 on 2026-10-07. Checked items describe local evid
 - [x] PNG icon, description, keywords, categories, dark gallery banner, and supported workspace capabilities are declared.
 - [x] Lockfile is synchronized. `.gitignore` excludes dependencies, generated bundles, native binaries, caches, test installations, and VSIX packages.
 - [x] Project sources published to `master` in `catomak/swagger-lens`, preserving the repository's initial commit and Apache license.
-- [ ] Confirm the first six-target GitHub Actions run; native runtime results are tracked in the Validation section below.
+- [ ] Confirm a successful six-target GitHub Actions run. The initial run exposed a Windows drive-letter alias bug and standalone test fixtures inheriting the project repository; fixes are included in 0.3.8.
 
 ## License and packaged contents
 
 - [x] Project-owned code: Apache-2.0; copyright **2026 catomak** in `NOTICE` and README.
 - [x] Full third-party licenses, copyright statements, and upstream NOTICE files are retained. The npm inventory covers 109 packages from actual bundle inputs; the Go inventory includes 34 notice sets for native engine dependencies and the Go runtime.
 - [x] `npm run package` uses the validated native release flow. No universal package is advertised for native engines.
-- [x] All six 0.3.7 archives passed checks of the manifest, icon, runtime assets, native engine, license, and notices, with no development files or `AGENTS.md`. Previous VSIX files were preserved unchanged.
+- [ ] Confirm all six 0.3.8 packages pass archive and native installed-VSIX checks. Previous locally packaged VSIX files remain unchanged.
 
 ## Validation
 
-- [x] 60 unit tests and 14 installed-VSIX webview scenarios passed on macOS ARM64 with VS Code 1.141.0. Reports: `builds/reports/0.3.7/`. The first run timed out while loading a second webview; the subsequent full release run passed. Failed-run diagnostics remain in `.build/failed-0.3.7/`.
+- [ ] Confirm 62 unit tests and 14 installed-VSIX webview scenarios pass on every native target with VS Code stable. Windows drive aliases have explicit regression coverage; standalone fixtures run outside the checkout.
 - [ ] Test the installed package against the declared minimum VS Code version, 1.90.0.
 - [ ] Obtain successful native CI results for macOS Intel/ARM64, Windows x64/ARM64, and Linux x64/ARM64. Cross-packaging alone does not confirm foreign-platform runtime behavior.
 - [x] Production dependency audit reviewed on 2026-10-07: no high or critical findings; five moderate package entries refer to one [sprintf-js advisory](https://github.com/advisories/GHSA-hp3w-g68c-fv3c), with no patched version. `sprintf-js` and `argparse` are excluded from both bundle input graphs; Remarkable's browser entry excludes its CLI dependency. The shipped prebuilt Swagger UI and Remarkable browser bundles contain no references to that dependency or its affected number-formatting calls. The dependency finding remains in the development install and must be reviewed again when dependencies change.

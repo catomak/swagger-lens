@@ -2,7 +2,7 @@
   "name": "swagger-lens",
   "displayName": "Swagger Lens",
   "description": "Swagger preview with local OpenAPI diffs, affected endpoints, shared schemas, and light/dark themes.",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "icon": "assets/icon.png",
   "publisher": "Catomak",
   "license": "Apache-2.0",

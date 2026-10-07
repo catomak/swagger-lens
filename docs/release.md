@@ -43,7 +43,7 @@ xvfb-run -a npm run release
 
 Xvfb provides a virtual display; it does not emulate Linux or another CPU.
 
-Downloads are cached under `.cache/oasdiff/` and `.vscode-test/`. Staged files, isolated extensions, test fixtures and VS Code logs are under `.build/`. A short temporary profile avoids Unix socket path limits and is removed after the run. The normal VS Code installation and extensions stay untouched. Set `API_DIFF_VSCODE_VERSION` to a specific release to reproduce a run; the report records the actual VS Code version.
+Downloads are cached under `.cache/oasdiff/` and `.vscode-test/`. Staged files, isolated extensions and VS Code logs are under `.build/`. Test fixtures live in a short temporary directory outside the checkout so standalone contracts cannot inherit its Git repository. Fixtures and the short temporary VS Code profile are removed after the run; the short profile also avoids Unix socket path limits. The normal VS Code installation and extensions stay untouched. Set `API_DIFF_VSCODE_VERSION` to a specific release to reproduce a run; the report records the actual VS Code version.
 
 For faster source-only checks after a release, reuse the staged native engine. Examples:
 

@@ -35,6 +35,31 @@ async function resolve(bundle) {
   return result.spec;
 }
 
+for (const drive of ['C', 'c']) {
+  test(`Windows drive aliases preserve ${drive}: dependency paths and prune unrelated references`, async () => {
+    const root = `file:///${drive}:/work/api.json`, models = `file:///${drive}:/work/Schemas.json`;
+    const current = api('file:///c:/work/Schemas.json#/Wanted');
+    current.components = { schemas: {
+      Local: { type: 'string' },
+      Alias: { $ref: 'file:///C:/work/Schemas.json#/Wanted' },
+      RootAlias: { $ref: `file:///${drive === 'C' ? 'c' : 'C'}:/work/api.json#/components/schemas/Local` }
+    } };
+    const reads = [];
+    const loaded = await bundleLocal(root, current, url => {
+      reads.push(url);
+      assert.equal(url, models);
+      return JSON.stringify({ Wanted: { type: 'object', properties: { name: { type: 'string' } } }, Unused: { $ref: './missing.json' } });
+    }, true);
+    assert.deepEqual(reads, [models]);
+    assert.deepEqual(loaded.dependencies, [root, models]);
+    assert.doesNotMatch(JSON.stringify(loaded.bundle), /Unused|missing\.json/);
+    const expanded = await RefParser.dereference(structuredClone(loaded.bundle), { resolve: { file: false, http: false } });
+    assert.equal(response(expanded).properties.name.type, 'string');
+    assert.equal(expanded.components.schemas.Alias.properties.name.type, 'string');
+    assert.equal(expanded.components.schemas.RootAlias.type, 'string');
+  });
+}
+
 for (const [format, version] of [['json', '3.0.3'], ['yaml', '3.1.2']]) {
   test(`${format.toUpperCase()} neighboring Swagger over 5,000 lines loads only reachable fragments, once per file`, async t => {
     const root = await folder(t), file = path.join(root, 'service-a', `api.${format}`);

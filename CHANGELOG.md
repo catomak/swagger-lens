@@ -4,6 +4,11 @@ A brief history of project changes, with the latest entries first.
 
 ## Unreleased
 
+## 0.3.8 — 2026-10-07
+
+- Fixed Windows drive-letter aliases bypassing selective schema imports and duplicating dependencies.
+- Isolated installed-VSIX fixtures from the project repository and waited for final preview state when test actions overlap automatic refreshes.
+
 - Published project sources on GitHub and enabled the six-platform build and test workflow.
 
 ## 0.3.7 — 2026-10-07
