@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: OpenAPI 3.0 YAML fixture
+  version: 1.1.0
+paths:
+  /applications:
+    get:
+      operationId: listApplications
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Level1"
+  /applications/{id}:
+    get:
+      operationId: getApplication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Level1"
+  /applications/recheck:
+    post:
+      operationId: recheckApplication
+      summary: Recheck an application
+      responses:
+        "204":
+          description: Accepted
+  /health:
+    get:
+      operationId: health
+      summary: Unchanged health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+              example:
+                status: ok
+components:
+  schemas:
+    Level1:
+      type: object
+      properties:
+        level2:
+          $ref: "#/components/schemas/Level2"
+    Level2:
+      type: object
+      properties:
+        level3:
+          $ref: "#/components/schemas/Level3"
+    Level3:
+      type: object
+      properties:
+        level4:
+          $ref: "#/components/schemas/Level4"
+    Level4:
+      type: object
+      properties:
+        level5:
+          $ref: "#/components/schemas/Level5"
+    Level5:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - draft
+            - active
+            - closed
+        reason:
+          type: string
+          description: New decision reason
+servers:
+  - url: http://127.0.0.1:8788
+    description: Local fixture server

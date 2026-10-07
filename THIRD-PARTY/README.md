@@ -1,0 +1,121 @@
+# Third-party notices
+
+Swagger Lens's own code is licensed under Apache-2.0. The components below retain their original licenses and copyright notices.
+
+The npm inventory is generated from both esbuild input graphs, including transitive dependencies. Full licenses and upstream NOTICE files are copied without modification. Supplemental licenses cover notices omitted from npm packages; their provenance is recorded in supplemental/README.md. Generated bundle comments are retained in dist/*.LEGAL.txt.
+
+oasdiff 1.33.0 and its Go runtime and module notices are in oasdiff.LICENSE, go-components.json, and go/. The Go inventory covers the union of dependencies recorded in all bundled platform binaries. Native archives are verified against pinned SHA-256 hashes before packaging.
+
+## Bundled JavaScript components
+
+| Component | Version | License | Notices |
+| --- | --- | --- | --- |
+| @apidevtools/json-schema-ref-parser | 16.0.3 | MIT | [Files](npm/_apidevtools_json-schema-ref-parser-16.0.3/) |
+| @babel/runtime | 7.29.7 | MIT | [Files](npm/_babel_runtime-7.29.7/) |
+| @babel/runtime-corejs3 | 7.29.7 | MIT | [Files](npm/_babel_runtime-corejs3-7.29.7/) |
+| @inditextech/swagger-ui-plugin-diff-highlight | 0.1.0 | Apache-2.0 | [Files](npm/_inditextech_swagger-ui-plugin-diff-highlight-0.1.0/) |
+| @swagger-api/apidom-ast | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ast-1.11.6/) |
+| @swagger-api/apidom-core | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-core-1.11.6/) |
+| @swagger-api/apidom-error | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-error-1.11.6/) |
+| @swagger-api/apidom-json-pointer | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-json-pointer-1.11.6/) |
+| @swagger-api/apidom-ns-json-schema-2019-09 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-json-schema-2019-09-1.11.6/) |
+| @swagger-api/apidom-ns-json-schema-2020-12 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-json-schema-2020-12-1.11.6/) |
+| @swagger-api/apidom-ns-json-schema-draft-4 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-json-schema-draft-4-1.11.6/) |
+| @swagger-api/apidom-ns-json-schema-draft-6 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-json-schema-draft-6-1.11.6/) |
+| @swagger-api/apidom-ns-json-schema-draft-7 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-json-schema-draft-7-1.11.6/) |
+| @swagger-api/apidom-ns-openapi-3-0 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-openapi-3-0-1.11.6/) |
+| @swagger-api/apidom-ns-openapi-3-1 | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-ns-openapi-3-1-1.11.6/) |
+| @swagger-api/apidom-reference | 1.11.6 | Apache-2.0 | [Files](npm/_swagger-api_apidom-reference-1.11.6/) |
+| @swaggerexpert/cookie | 2.0.2 | Apache-2.0 | [Files](npm/_swaggerexpert_cookie-2.0.2/) |
+| @swaggerexpert/json-pointer | 2.10.2 | Apache-2.0 | [Files](npm/_swaggerexpert_json-pointer-2.10.2/) |
+| @tanstack/react-virtual | 3.14.10 | MIT | [Files](npm/_tanstack_react-virtual-3.14.10/) |
+| @tanstack/virtual-core | 3.17.8 | MIT | [Files](npm/_tanstack_virtual-core-3.17.8/) |
+| apg-lite | 1.0.5 | BSD-2-Clause | [Files](npm/apg-lite-1.0.5/) |
+| autolinker | 3.16.2 | MIT | [Files](npm/autolinker-3.16.2/) |
+| available-typed-arrays | 1.0.7 | MIT | [Files](npm/available-typed-arrays-1.0.7/) |
+| base64-js | 1.5.1 | MIT | [Files](npm/base64-js-1.5.1/) |
+| buffer | 6.0.3 | MIT | [Files](npm/buffer-6.0.3/) |
+| call-bind | 1.0.9 | MIT | [Files](npm/call-bind-1.0.9/) |
+| call-bind-apply-helpers | 1.0.2 | MIT | [Files](npm/call-bind-apply-helpers-1.0.2/) |
+| call-bound | 1.0.4 | MIT | [Files](npm/call-bound-1.0.4/) |
+| classnames | 2.5.1 | MIT | [Files](npm/classnames-2.5.1/) |
+| copy-to-clipboard | 3.3.3 | MIT | [Files](npm/copy-to-clipboard-3.3.3/) |
+| core-js-pure | 3.50.0 | MIT | [Files](npm/core-js-pure-3.50.0/) |
+| css.escape | 1.5.1 | MIT | [Files](npm/css.escape-1.5.1/) |
+| deepmerge | 4.3.1 | MIT | [Files](npm/deepmerge-4.3.1/) |
+| define-data-property | 1.1.4 | MIT | [Files](npm/define-data-property-1.1.4/) |
+| dompurify | 3.4.16 | (MPL-2.0 OR Apache-2.0) | [Files](npm/dompurify-3.4.16/) |
+| drange | 1.1.1 | MIT | [Files](npm/drange-1.1.1/) |
+| dunder-proto | 1.0.1 | MIT | [Files](npm/dunder-proto-1.0.1/) |
+| es-define-property | 1.0.1 | MIT | [Files](npm/es-define-property-1.0.1/) |
+| es-errors | 1.3.0 | MIT | [Files](npm/es-errors-1.3.0/) |
+| es-object-atoms | 1.1.2 | MIT | [Files](npm/es-object-atoms-1.1.2/) |
+| fast-json-patch | 3.1.1 | MIT | [Files](npm/fast-json-patch-3.1.1/) |
+| fault | 1.0.4 | MIT | [Files](npm/fault-1.0.4/) |
+| for-each | 0.3.5 | MIT | [Files](npm/for-each-0.3.5/) |
+| format | 0.2.2 | MIT | [Files](npm/format-0.2.2/) |
+| function-bind | 1.1.2 | MIT | [Files](npm/function-bind-1.1.2/) |
+| get-intrinsic | 1.3.0 | MIT | [Files](npm/get-intrinsic-1.3.0/) |
+| get-proto | 1.0.1 | MIT | [Files](npm/get-proto-1.0.1/) |
+| gopd | 1.2.0 | MIT | [Files](npm/gopd-1.2.0/) |
+| has-property-descriptors | 1.0.2 | MIT | [Files](npm/has-property-descriptors-1.0.2/) |
+| has-symbols | 1.1.0 | MIT | [Files](npm/has-symbols-1.1.0/) |
+| has-tostringtag | 1.0.2 | MIT | [Files](npm/has-tostringtag-1.0.2/) |
+| hasown | 2.0.4 | MIT | [Files](npm/hasown-2.0.4/) |
+| highlight.js | 10.7.3 | BSD-3-Clause | [Files](npm/highlight.js-10.7.3/) |
+| ieee754 | 1.2.1 | BSD-3-Clause | [Files](npm/ieee754-1.2.1/) |
+| immutable | 5.1.9 | MIT | [Files](npm/immutable-5.1.9/) |
+| is-callable | 1.2.7 | MIT | [Files](npm/is-callable-1.2.7/) |
+| is-typed-array | 1.1.15 | MIT | [Files](npm/is-typed-array-1.1.15/) |
+| isarray | 2.0.5 | MIT | [Files](npm/isarray-2.0.5/) |
+| js-file-download | 0.4.12 | MIT | [Files](npm/js-file-download-0.4.12/) |
+| js-yaml | 4.3.2 | MIT | [Files](npm/js-yaml-4.3.2/) |
+| js-yaml | 4.3.2 | MIT | [Files](npm/js-yaml-4.3.2/) |
+| js-yaml | 5.4.3 | MIT | [Files](npm/js-yaml-5.4.3/) |
+| lodash | 4.18.1 | MIT | [Files](npm/lodash-4.18.1/) |
+| lodash.debounce | 4.0.8 | MIT | [Files](npm/lodash.debounce-4.0.8/) |
+| lowlight | 1.20.0 | MIT | [Files](npm/lowlight-1.20.0/) |
+| math-intrinsics | 1.1.0 | MIT | [Files](npm/math-intrinsics-1.1.0/) |
+| minim | 0.23.8 | MIT | [Files](npm/minim-0.23.8/) |
+| neotraverse | 1.0.1 | MIT | [Files](npm/neotraverse-1.0.1/) |
+| openapi-path-templating | 2.2.1 | Apache-2.0 | [Files](npm/openapi-path-templating-2.2.1/) |
+| openapi-server-url-templating | 1.3.0 | Apache-2.0 | [Files](npm/openapi-server-url-templating-1.3.0/) |
+| possible-typed-array-names | 1.1.0 | MIT | [Files](npm/possible-typed-array-names-1.1.0/) |
+| prop-types | 15.8.1 | MIT | [Files](npm/prop-types-15.8.1/) |
+| querystringify | 2.2.0 | MIT | [Files](npm/querystringify-2.2.0/) |
+| ramda | 0.30.1 | MIT | [Files](npm/ramda-0.30.1/) |
+| ramda-adjunct | 5.1.0 | BSD-3-Clause | [Files](npm/ramda-adjunct-5.1.0/) |
+| randexp | 0.5.3 | MIT | [Files](npm/randexp-0.5.3/) |
+| react | 18.3.1 | MIT | [Files](npm/react-18.3.1/) |
+| react-copy-to-clipboard | 5.1.1 | MIT | [Files](npm/react-copy-to-clipboard-5.1.1/) |
+| react-debounce-input | 3.3.0 | MIT | [Files](npm/react-debounce-input-3.3.0/) |
+| react-dom | 18.3.1 | MIT | [Files](npm/react-dom-18.3.1/) |
+| react-immutable-proptypes | 2.2.0 | MIT | [Files](npm/react-immutable-proptypes-2.2.0/) |
+| react-immutable-pure-component | 2.2.2 | MIT | [Files](npm/react-immutable-pure-component-2.2.2/) |
+| react-redux | 9.3.0 | MIT | [Files](npm/react-redux-9.3.0/) |
+| react-syntax-highlighter | 16.1.1 | MIT | [Files](npm/react-syntax-highlighter-16.1.1/) |
+| redux | 5.0.1 | MIT | [Files](npm/redux-5.0.1/) |
+| remarkable | 2.0.1 | MIT | [Files](npm/remarkable-2.0.1/) |
+| repeat-string | 1.6.1 | MIT | [Files](npm/repeat-string-1.6.1/) |
+| requires-port | 1.0.0 | MIT | [Files](npm/requires-port-1.0.0/) |
+| reselect | 5.3.0 | MIT | [Files](npm/reselect-5.3.0/) |
+| ret | 0.2.2 | MIT | [Files](npm/ret-0.2.2/) |
+| safe-buffer | 5.2.1 | MIT | [Files](npm/safe-buffer-5.2.1/) |
+| scheduler | 0.23.2 | MIT | [Files](npm/scheduler-0.23.2/) |
+| serialize-error | 8.1.0 | MIT | [Files](npm/serialize-error-8.1.0/) |
+| set-function-length | 1.2.2 | MIT | [Files](npm/set-function-length-1.2.2/) |
+| short-unique-id | 5.3.2 | Apache-2.0 | [Files](npm/short-unique-id-5.3.2/) |
+| swagger-client | 3.38.2 | Apache-2.0 | [Files](npm/swagger-client-3.38.2/) |
+| swagger-ui-react | 5.33.1 | Apache-2.0 | [Files](npm/swagger-ui-react-5.33.1/) |
+| to-buffer | 1.2.2 | MIT | [Files](npm/to-buffer-1.2.2/) |
+| toggle-selection | 1.0.6 | MIT | [Files](npm/toggle-selection-1.0.6/) |
+| ts-mixer | 6.0.4 | MIT | [Files](npm/ts-mixer-6.0.4/) |
+| tslib | 2.8.1 | 0BSD | [Files](npm/tslib-2.8.1/) |
+| typed-array-buffer | 1.0.3 | MIT | [Files](npm/typed-array-buffer-1.0.3/) |
+| unraw | 3.0.0 | MIT | [Files](npm/unraw-3.0.0/) |
+| url-parse | 1.5.10 | MIT | [Files](npm/url-parse-1.5.10/) |
+| use-sync-external-store | 1.7.0 | MIT | [Files](npm/use-sync-external-store-1.7.0/) |
+| which-typed-array | 1.1.24 | MIT | [Files](npm/which-typed-array-1.1.24/) |
+| xml-but-prettier | 1.0.1 | MIT | [Files](npm/xml-but-prettier-1.0.1/) |
+| yaml | 2.9.1 | ISC | [Files](npm/yaml-2.9.1/) |
+| zenscroll | 4.0.2 | Unlicense | [Files](npm/zenscroll-4.0.2/) |

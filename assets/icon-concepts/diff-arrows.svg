@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Swagger Lens arrow icon concept</title>
+  <rect width="256" height="256" fill="#111516"/>
+  <circle cx="128" cy="128" r="110" fill="#73E63A"/>
+  <g fill="none" stroke="#111516" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M74 74 C59 74 57 81 57 96 L57 108 C57 120 53 125 46 128 C53 131 57 136 57 148 L57 160 C57 175 59 182 74 182"/>
+    <path d="M182 74 C197 74 199 81 199 96 L199 108 C199 120 203 125 210 128 C203 131 199 136 199 148 L199 160 C199 175 197 182 182 182"/>
+  </g>
+  <g fill="none" stroke="#111516" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="96" cy="93" r="12"/>
+    <path d="M96 105 V121 C96 137 104 145 118 157 L128 167 H98"/>
+    <path d="M110 155 L98 167 L110 179"/>
+    <circle cx="160" cy="164" r="12"/>
+    <path d="M160 152 V133 C160 119 153 110 142 100 L134 92 H167"/>
+    <path d="M155 80 L167 92 L155 104"/>
+  </g>
+</svg>

@@ -1,0 +1,62 @@
+Record:
+  type: object
+  required:
+    - status
+  properties:
+    status:
+      type:
+        - string
+        - "null"
+      enum:
+        - draft
+        - active
+        - null
+    kind:
+      type: string
+      const: record
+    amount:
+      type: number
+      exclusiveMinimum: 0
+      exclusiveMaximum: 1000
+    free: true
+    blocked: false
+    legacyCode:
+      type: string
+      description: Field removed in the new contract
+    label:
+      $ref: "#/Label"
+      maxLength: 12
+    tuple:
+      type: array
+      prefixItems:
+        - type: string
+        - type: integer
+          minimum: 0
+      items: false
+  patternProperties:
+    ^x-:
+      type: string
+      minLength: 1
+  if:
+    properties:
+      status:
+        const: active
+    required:
+      - status
+  then:
+    properties:
+      amount:
+        minimum: 1
+  example:
+    status: draft
+    kind: record
+    amount: 50
+    legacyCode: OLD
+    label: Demo
+    tuple:
+      - demo
+      - 2
+Label:
+  type: string
+  minLength: 2
+  pattern: ^[A-Za-z]+$

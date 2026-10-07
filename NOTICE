@@ -1,0 +1,14 @@
+Swagger Lens
+Copyright 2026 catomak
+
+Swagger Lens's own code is licensed under the Apache License, Version 2.0.
+
+This product includes third-party software. Its original licenses, copyright
+notices, and upstream NOTICE files are provided in THIRD-PARTY/ and the
+generated dist/*.LEGAL.txt files. Those components retain their own licenses.
+
+Swagger UI and swagger-client
+Copyright 2020-2021 SmartBear Software Inc.
+
+oasdiff
+Licensed under the Apache License, Version 2.0.

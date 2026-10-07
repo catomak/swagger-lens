@@ -1,0 +1,20 @@
+Envelope:
+  type: object
+  properties:
+    payload:
+      $ref: "#/Payload"
+Payload:
+  type: object
+  properties:
+    meta:
+      $ref: "#/Meta"
+Meta:
+  type: object
+  properties:
+    details:
+      $ref: "#/Details"
+Details:
+  type: object
+  properties:
+    record:
+      $ref: ./record.yaml#/Record

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Swagger Lens green and white smile icon</title>
+  <rect width="256" height="256" fill="#FFFFFF"/>
+  <circle cx="128" cy="128" r="110" fill="#73E63A"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M74 74 C59 74 57 81 57 96 L57 108 C57 120 53 125 46 128 C53 131 57 136 57 148 L57 160 C57 175 59 182 74 182"/>
+    <path d="M182 74 C197 74 199 81 199 96 L199 108 C199 120 203 125 210 128 C203 131 199 136 199 148 L199 160 C199 175 197 182 182 182"/>
+    <path d="M94 111 L102 131 M121 103 L129 123"/>
+    <path d="M105 162 C137 158 158 139 169 111" stroke-width="13"/>
+  </g>
+</svg>

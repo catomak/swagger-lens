@@ -1,0 +1,272 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "OpenAPI 3.1 fixture",
+    "version": "1.1.0",
+    "description": "Shared schemas nested five levels deep, JSON Schema 2020-12 constraints, and a webhook."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8788",
+      "description": "Local fixture server"
+    }
+  ],
+  "paths": {
+    "/records": {
+      "get": {
+        "operationId": "listRecords",
+        "summary": "List records",
+        "responses": {
+          "200": {
+            "description": "Records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createRecord",
+        "summary": "Create a record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/records/{id}": {
+      "get": {
+        "operationId": "getRecord",
+        "summary": "Get a record",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Unchanged health check",
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/records/recheck": {
+      "post": {
+        "operationId": "recheckRecord",
+        "summary": "Operation added in the new contract",
+        "responses": {
+          "204": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "record.changed": {
+      "post": {
+        "operationId": "recordChanged",
+        "summary": "Record changed notification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Acknowledged"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Envelope": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/Payload"
+          }
+        }
+      },
+      "Payload": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "details": {
+            "$ref": "#/components/schemas/Details"
+          }
+        }
+      },
+      "Details": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/Record"
+          }
+        }
+      },
+      "Record": {
+        "type": "object",
+        "required": [
+          "status",
+          "reason"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "closed"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "const": "published"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 500
+          },
+          "free": false,
+          "blocked": true,
+          "label": {
+            "$ref": "#/components/schemas/Label",
+            "maxLength": 8
+          },
+          "tuple": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "items": false
+          },
+          "reason": {
+            "type": "string",
+            "description": "Required decision reason"
+          }
+        },
+        "patternProperties": {
+          "^x-": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "if": {
+          "properties": {
+            "status": {
+              "const": "closed"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "amount": {
+              "minimum": 20
+            }
+          }
+        },
+        "example": {
+          "status": "active",
+          "kind": "published",
+          "amount": 100,
+          "reason": "Approved",
+          "label": "Demo",
+          "tuple": [
+            "demo",
+            2
+          ]
+        }
+      },
+      "Label": {
+        "type": "string",
+        "minLength": 2,
+        "pattern": "^[A-Za-z]+$"
+      }
+    }
+  }
+}

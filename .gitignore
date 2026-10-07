@@ -1,0 +1,9 @@
+node_modules/
+dist/
+bin/
+.build/
+.cache/
+.vscode-test/
+builds/
+demo/
+.DS_Store
