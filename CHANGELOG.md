@@ -4,6 +4,8 @@ Release descriptions come from the matching version section below. Editing rules
 
 ## Unreleased
 
+- Documented required Azure DevOps service-principal enrollment before Marketplace profile lookup; missing-profile errors now explain the setup step.
+
 - Corrected federated-credential setup to match this repository's GitHub OIDC subject, including immutable owner and repository IDs.
 
 - Replaced PAT-based Marketplace publishing with GitHub OIDC and Microsoft Entra ID. Added an explicit retry of the current GitHub release without rebuilding its packages.

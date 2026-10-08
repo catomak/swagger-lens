@@ -1,6 +1,6 @@
 # Publication checklist
 
-GitHub release `0.4.0` is published and all six native platforms passed. Marketplace publication awaits Microsoft Entra ID setup; the initial PAT job failed because `VSCE_PAT` was absent. The previous `0.3.8` release remains verified on all six Marketplace platforms; the historical checks below describe that release.
+GitHub release `0.4.0` is published and all six native platforms passed. Marketplace publication awaits Azure DevOps identity enrollment and publisher Contributor membership; the initial PAT job failed because `VSCE_PAT` was absent. The previous `0.3.8` release remains verified on all six Marketplace platforms; the historical checks below describe that release.
 
 ## Identity and repository
 
@@ -42,5 +42,7 @@ Follow the official [publishing guide](https://code.visualstudio.com/api/working
 - [x] Tag CI configured to wait for six native package/test jobs, publish a complete GitHub release, then publish the same Marketplace packages.
 - [x] All six native `0.4.0` builds pass 108 unit tests and 32 installed-VSIX scenarios on VS Code 1.141.0: [CI run 37747217028](https://github.com/catomak/swagger-lens/actions/runs/37747217028), source commit `1850c57`. Reports are saved in `builds/reports/0.4.0/`.
 - [x] [GitHub release `v0.4.0`](https://github.com/catomak/swagger-lens/releases/tag/v0.4.0) contains all six tested VSIX packages and verified checksums, matching changelog notes, and tagged source archives. The exact published packages are saved in `builds/`.
-- [ ] Microsoft Entra application, federated credential, publisher Contributor membership, and repository `AZURE_CLIENT_ID`/`AZURE_TENANT_ID` secrets configured; the Marketplace publish job succeeds. See docs/release.md.
+- [x] Entra application, federated credential, and repository `AZURE_CLIENT_ID`/`AZURE_TENANT_ID` secrets validated by [run 37800703821](https://github.com/catomak/swagger-lens/actions/runs/37800703821): GitHub OIDC login succeeds and the six published packages pass verification.
+- [ ] Service principal enrolled in an Azure DevOps organization connected to the same tenant, then added to publisher Catomak as Contributor. Profile lookup currently reports `VSS011031` / `ProfileDoesNotExistException`; see docs/release.md.
+- [ ] Marketplace publish job succeeds.
 - [ ] All six Marketplace `0.4.0` platforms report validated.

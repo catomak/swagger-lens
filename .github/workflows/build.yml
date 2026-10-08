@@ -175,7 +175,14 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
       - name: Resolve the Marketplace identity
-        run: az rest --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798 --query id --output tsv
+        run: |
+          if ! az rest --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798 --query id --output tsv 2> identity-error.txt; then
+            cat identity-error.txt >&2
+            if [[ "$(cat identity-error.txt)" == *ProfileDoesNotExistException* ]]; then
+              echo "::error::Register Swagger Lens Marketplace in an Azure DevOps organization connected to the same Entra tenant: Organization Settings > Users > Add users. See docs/release.md."
+            fi
+            exit 1
+          fi
       - name: Publish all six packages with Microsoft Entra ID
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
