@@ -1,6 +1,6 @@
 # Backlog
 
-Latest verified Marketplace release: `0.3.8`. Release `0.4.0` is being prepared; publication status is recorded in docs/publication-checklist.md.
+Latest GitHub release: `0.4.0`, verified on all six native platforms. Latest verified Marketplace release: `0.3.8`; `0.4.0` awaits Entra authentication setup. Publication status is recorded in docs/publication-checklist.md.
 
 1. [x] Add a button to collapse the panel with the list of changes. Use left/right chevrons for a side panel and up/down chevrons for a stacked panel; preserve list visibility when switching modes. Completed in `0.3.2`.
 2. [x] Add YAML and OpenAPI 3.1.x test fixtures. Permanent before/after pairs for YAML 3.0, JSON 3.1, and split YAML 3.1, with automated 3.1.0/3.1.1/3.1.2 checks and demonstration instructions. Completed in `0.3.3`.
@@ -20,4 +20,4 @@ Latest verified Marketplace release: `0.3.8`. Release `0.4.0` is being prepared;
 16. [x] Expose user settings for auto closure, refresh, opening mode, theme, change filtering/list visibility, schema expansion, and Try it out, alongside Git base and engine path. Documented in docs/usage.md; included in `0.4.0`.
 17. [ ] Replace the Refresh button label with an icon and pin it on the right next to the light/dark theme toggle.
 18. [x] Publish GitHub releases after all six native builds and installed-VSIX tests pass. Attach tested VSIX packages and SHA-256 checksums; GitHub provides tagged source ZIP/tar archives. Extract release descriptions from CHANGELOG.md. Implemented in `0.4.0`.
-19. [x] Automatically publish the six GitHub release VSIX packages to VS Code Marketplace, with checksum/version/target checks and duplicate-safe retries. Requires the `VSCE_PAT` repository secret. Implemented in `0.4.0`.
+19. [x] Automatically publish the six GitHub release VSIX packages to VS Code Marketplace, with checksum/version/target checks and duplicate-safe retries. Pipeline added in `0.4.0`; current workflow uses GitHub OIDC and Microsoft Entra ID. Live publication awaits Entra setup.

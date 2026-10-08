@@ -1,6 +1,6 @@
 # Publication checklist
 
-Release `0.4.0` is in preparation. The previous `0.3.8` release remains verified on all six Marketplace platforms; the historical checks below describe that release.
+GitHub release `0.4.0` is published and all six native platforms passed. Marketplace publication awaits Microsoft Entra ID setup; the initial PAT job failed because `VSCE_PAT` was absent. The previous `0.3.8` release remains verified on all six Marketplace platforms; the historical checks below describe that release.
 
 ## Identity and repository
 
@@ -34,13 +34,13 @@ Release `0.4.0` is in preparation. The previous `0.3.8` release remains verified
 - [x] All six tested VSIX targets are uploaded under extension `Catomak.swagger-lens`, version `0.3.8`, and report `validated` through the public Marketplace API.
 - [ ] Install from Marketplace and check Preview/Diffs.
 
-Follow the official [publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) and [manifest reference](https://code.visualstudio.com/api/references/extension-manifest). Version-tag CI publishes a GitHub release after all six native jobs pass, then publishes its verified assets to Marketplace using the `VSCE_PAT` repository secret.
+Follow the official [publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) and [manifest reference](https://code.visualstudio.com/api/references/extension-manifest). Version-tag CI publishes a GitHub release after all six native jobs pass, then publishes its verified assets to Marketplace using GitHub OIDC and Microsoft Entra ID.
 
 ## 0.4.0 release
 
 - [x] Release version and changelog prepared; agent rules define changelog maintenance and release-note extraction.
 - [x] Tag CI configured to wait for six native package/test jobs, publish a complete GitHub release, then publish the same Marketplace packages.
-- [ ] All six native `0.4.0` builds and installed-VSIX tests pass.
-- [ ] GitHub release `v0.4.0` contains all six VSIX packages, checksums, changelog notes, and tagged source archives.
-- [ ] Repository Actions secret `VSCE_PAT` configured and the Marketplace publish job succeeds.
+- [x] All six native `0.4.0` builds pass 108 unit tests and 32 installed-VSIX scenarios on VS Code 1.141.0: [CI run 37747217028](https://github.com/catomak/swagger-lens/actions/runs/37747217028), source commit `1850c57`. Reports are saved in `builds/reports/0.4.0/`.
+- [x] [GitHub release `v0.4.0`](https://github.com/catomak/swagger-lens/releases/tag/v0.4.0) contains all six tested VSIX packages and verified checksums, matching changelog notes, and tagged source archives. The exact published packages are saved in `builds/`.
+- [ ] Microsoft Entra application, federated credential, publisher Contributor membership, and repository `AZURE_CLIENT_ID`/`AZURE_TENANT_ID` secrets configured; the Marketplace publish job succeeds. See docs/release.md.
 - [ ] All six Marketplace `0.4.0` platforms report validated.

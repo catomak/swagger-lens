@@ -79,7 +79,7 @@ The workflow runs on pull requests, pushes to `main`/`master`, version tags begi
 | `linux-x64` | `linux-x64` | `ubuntu-24.04` |
 | `linux-arm64` | `linux-arm64` | `ubuntu-24.04-arm` |
 
-Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<filename-suffix>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Version-tag runs publish a GitHub release and then upload the same verified packages to Marketplace. Branch and pull-request runs only build and test.
+Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<filename-suffix>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Version-tag runs publish a GitHub release and then upload the same verified packages to Marketplace. Branch and pull-request runs only build and test. Manual runs build by default; the explicit `publish_marketplace` option uploads the current version's existing release without rebuilding.
 
 All six standard runners are listed for public and private repositories. Standard hosted-runner usage is free for public repositories. Private repositories use the account's included minutes and then incur charges. See GitHub's [runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) and [billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
@@ -95,9 +95,43 @@ After the authorized release commit, push the matching version tag (for example 
 
 The Marketplace job runs after GitHub publication in the same workflow: releases created with `GITHUB_TOKEN` do not trigger separate release-event workflows. It downloads the published assets, verifies their checksums and extension identity/version/targets, and publishes all six using the pinned `@vscode/vsce`. It does not rebuild packages. Marketplace validation is asynchronous; successful upload is not a claim that all platforms are already validated.
 
-One-time setup: add the repository Actions secret **VSCE_PAT** in **Settings → Secrets and variables → Actions → New repository secret**. Use an Azure DevOps token for the Microsoft account authorized for publisher **Catomak**, with **Marketplace: Manage** and **All accessible organizations**. Keep the token out of source files, workflow text, and chat. CI exposes it only to the publish step. Follow the [official authentication guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publishing-extensions) for current token/identity requirements; global PAT retirement is scheduled for December 1, 2026.
+If publication fails after credentials are configured, use **Re-run failed jobs** on a tag run that contains the current Entra workflow. For the initial `v0.4.0` release, whose tagged workflow used PAT, run **Actions → Build and test VSIX → Run workflow**, select `master`, and enable **publish_marketplace**. This explicit mode uses the current package version, downloads its existing published release, verifies all six assets and checksums, and publishes without rebuilding. Already published version/platform pairs are skipped. Ordinary branch and pull-request builds never publish.
 
-If publication fails, fix the reported issue or credential and use **Actions → failed tag run → Re-run failed jobs**. Already published version/platform pairs are skipped, so a partial Marketplace upload can be resumed. GitHub release assets are kept unchanged. Ordinary branch or pull-request builds never publish.
+## Marketplace authentication
+
+Use **GitHub OIDC → Microsoft Entra ID → Visual Studio Marketplace**. The `marketplace` job uses `azure/login@v3` and the pinned `vsce` API with `azureCredential: true`. No client secret or PAT is stored. Azure login permits an identity with no Azure subscription; publishing permissions come from publisher membership, not an Azure resource role.
+
+The owner must have a Microsoft Entra tenant and permission to register an application. The project cannot create or grant access to that tenant through GitHub. One-time setup:
+
+1. In the [Entra admin center](https://entra.microsoft.com/), open **App registrations → New registration**. Name it `Swagger Lens Marketplace`, select this organizational directory only, and leave Redirect URI empty. Record **Application (client) ID** and **Directory (tenant) ID**. Do not create a client secret.
+2. Open the app's **Certificates & secrets → Federated credentials → Add credential**. Select **GitHub Actions deploying Azure resources** and enter:
+
+   | Field | Value |
+   | --- | --- |
+   | Organization | `catomak` |
+   | Repository | `swagger-lens` |
+   | Entity type | Environment |
+   | Environment | `marketplace` |
+   | Name | `github-swagger-lens-marketplace` |
+   | Issuer | `https://token.actions.githubusercontent.com` |
+   | Subject | `repo:catomak/swagger-lens:environment:marketplace` |
+   | Audience | `api://AzureADTokenExchange` |
+
+3. The repository environment **marketplace** is prepared under GitHub **Settings → Environments**, allowing tags `v*` and branch `master`; the latter permits retrying an existing release through the explicit manual option. Do not add a required reviewer if publication must remain automatic.
+4. Under **Settings → Secrets and variables → Actions → Repository secrets**, add **AZURE_CLIENT_ID** and **AZURE_TENANT_ID** with the two recorded IDs. They identify the app and directory; they are not access tokens. `VSCE_PAT` is unused.
+5. Run the workflow on `master` with **publish_marketplace** enabled. After Azure login, the **Resolve the Marketplace identity** step prints the app's Azure DevOps profile `id`, not a token. In [publisher Catomak](https://marketplace.visualstudio.com/manage/publishers/catomak), add that ID under **Members** with role **Contributor**. Publishing cannot succeed before this membership exists; use **Re-run failed jobs** after adding it.
+6. Verify the successful publish job and all six version/platform entries through Marketplace. Validation is asynchronous, so record upload and validation separately.
+
+The equivalent identity lookup after authenticating Azure CLI as that same application is:
+
+```sh
+az rest --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me \
+  --resource 499b84ac-1321-427f-aa17-267ca6975798 --query id --output tsv
+```
+
+Sources: Microsoft's [extension authentication guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#secure-automated-publishing-to-visual-studio-marketplace), [GitHub federation setup](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust), and [Azure Login](https://github.com/Azure/login#login-without-subscription). The guide's Azure Pipelines example is adapted here to GitHub Actions with an app registration.
+
+As checked on 2026-10-08, global Azure DevOps PATs stop working on **2026-12-01**; organization-scoped PATs are not part of that retirement. Direct `vsce --oidc` is present in the client but the maintainer reports incomplete Marketplace backend support in [issue 1275](https://github.com/microsoft/vscode-vsce/issues/1275). It is distinct from the working GitHub-to-Entra OIDC flow used here.
 
 ## Versions
 

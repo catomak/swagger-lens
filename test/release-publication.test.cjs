@@ -74,24 +74,39 @@ test('publication rejects a wrong extension version or target before any upload'
   await assert.rejects(releaseAssets(data.directory, manifest, data.inspect), /Wrong VS Code target/);
 });
 
-test('Marketplace publication uses only verified packages and allows retrying existing platform versions', async () => {
+test('Marketplace publication uses verified packages and Entra credentials without PAT fallback', async () => {
   const assets = { packages: ['one.vsix', 'two.vsix'] }, calls = [];
-  const publish = async (...args) => calls.push(args);
-  await assert.rejects(publishAssets(assets, '', publish), /VSCE_PAT repository secret/);
-  assert.deepEqual(calls, []);
-  await publishAssets(assets, 'test-only-credential', publish);
-  assert.deepEqual(calls, [[assets.packages, { pat: 'test-only-credential', skipDuplicate: true }]]);
+  await publishAssets(assets, async (...args) => calls.push(args));
+  assert.deepEqual(calls, [[assets.packages, { azureCredential: true, skipDuplicate: true }]]);
+  let attempts = 0;
+  await assert.rejects(publishAssets(assets, async () => { attempts++; throw new Error('Entra authorization failed'); }), /Entra authorization failed/);
+  assert.equal(attempts, 1);
 });
 
-test('CI publishes only version-tag runs after the complete build matrix and GitHub release', async () => {
+test('CI publishes after complete tag builds or explicitly retries an existing release without rebuilding', async () => {
   const workflow = YAML.parse(await fs.readFile('.github/workflows/build.yml', 'utf8'));
   assert.deepEqual(workflow.jobs.release.strategy.matrix.include.map(item => item.target).sort(), [...targets].sort());
   assert.equal(workflow.jobs['github-release'].needs, 'release');
+  assert.equal(workflow.jobs['github-release'].if, "github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')");
   assert.equal(workflow.jobs.marketplace.needs, 'github-release');
-  for (const job of [workflow.jobs['github-release'], workflow.jobs.marketplace]) assert.equal(job.if, "github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')");
   assert.equal(workflow.jobs['github-release'].permissions.contents, 'write');
-  assert.equal(workflow.jobs.marketplace.permissions.contents, 'read');
-  const publish = workflow.jobs.marketplace.steps.at(-1);
-  assert.equal(publish.env.VSCE_PAT, '${{ secrets.VSCE_PAT }}');
-  assert.match(publish.run, /release-assets.cjs publish/);
+  assert.deepEqual(workflow.jobs.marketplace.permissions, { contents: 'read', 'id-token': 'write' });
+  assert.equal(workflow.jobs.marketplace.environment, 'marketplace');
+  assert.equal(workflow.on.workflow_dispatch.inputs.publish_marketplace.default, false);
+  const gate = new Function('github', 'inputs', 'result', 'cancelled', 'always', 'startsWith', `return ${workflow.jobs.marketplace.if.replaceAll('needs.github-release.result', 'result')}`);
+  for (const [event, ref, manual, result, canceled, expected] of [
+    ['push', 'refs/tags/v0.4.0', false, 'success', false, true],
+    ['push', 'refs/tags/v0.4.0', false, 'failure', false, false],
+    ['push', 'refs/heads/master', false, 'skipped', false, false],
+    ['pull_request', 'refs/pull/1/merge', false, 'skipped', false, false],
+    ['workflow_dispatch', 'refs/heads/master', false, 'skipped', false, false],
+    ['workflow_dispatch', 'refs/heads/master', true, 'skipped', false, true],
+    ['workflow_dispatch', 'refs/heads/master', true, 'skipped', true, false]
+  ]) assert.equal(gate({ event_name: event, ref }, { publish_marketplace: manual }, result, () => canceled, () => true, (a, b) => a.startsWith(b)), expected);
+  const login = workflow.jobs.marketplace.steps.find(step => step.uses === 'azure/login@v3');
+  assert.equal(login.with['client-id'], '${{ secrets.AZURE_CLIENT_ID }}');
+  assert.equal(login.with['tenant-id'], '${{ secrets.AZURE_TENANT_ID }}');
+  assert.equal(login.with['allow-no-subscriptions'], true);
+  assert.ok(!JSON.stringify(workflow).includes('VSCE_PAT'));
+  assert.match(workflow.jobs.marketplace.steps.at(-1).run, /release-assets.cjs publish/);
 });

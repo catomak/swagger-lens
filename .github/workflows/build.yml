@@ -2,6 +2,11 @@ name: Build and test VSIX
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_marketplace:
+        description: Publish the current version's existing GitHub release to Marketplace without rebuilding
+        type: boolean
+        default: false
   push:
     branches: [main, master]
     tags: ['v*']
@@ -16,6 +21,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name != 'workflow_dispatch' || !inputs.publish_marketplace
     name: ${{ matrix.artifact || matrix.target }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
@@ -127,7 +133,12 @@ jobs:
   marketplace:
     name: Publish VS Code Marketplace
     needs: github-release
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      always() && !cancelled() && (
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && needs.github-release.result == 'success') ||
+        (github.event_name == 'workflow_dispatch' && inputs.publish_marketplace)
+      )
+    environment: marketplace
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     concurrency:
@@ -135,8 +146,16 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+      - name: Select the published version
+        env:
+          TAG_REF: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          release_tag="${TAG_REF:-$(node -p "'v' + require('./package.json').version")}"
+          node scripts/release-notes.cjs --tag "$release_tag"
+          echo "RELEASE_TAG=$release_tag" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -146,10 +165,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
         run: gh release download "$RELEASE_TAG" --dir release-assets --pattern '*.vsix' --pattern SHA256SUMS
-      - name: Verify and publish all six packages
+      - name: Verify the published assets
+        run: node scripts/release-assets.cjs verify "$RELEASE_TAG" release-assets
+      - name: Sign in to Microsoft Entra ID with GitHub OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Resolve the Marketplace identity
+        run: az rest --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798 --query id --output tsv
+      - name: Publish all six packages with Microsoft Entra ID
         env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: node scripts/release-assets.cjs publish "$RELEASE_TAG" release-assets

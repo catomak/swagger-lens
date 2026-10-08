@@ -28,9 +28,8 @@ async function releaseAssets(directory, manifest, inspect = readVsix) {
   return { packages, checksums: checksums.join('\n') + '\n' };
 }
 
-async function publishAssets(assets, pat, publish = require('@vscode/vsce').publishVSIX) {
-  assert.ok(pat, 'Add the VSCE_PAT repository secret before publishing to Marketplace');
-  await publish(assets.packages, { pat, skipDuplicate: true });
+async function publishAssets(assets, publish = require('@vscode/vsce').publishVSIX) {
+  await publish(assets.packages, { azureCredential: true, skipDuplicate: true });
 }
 
 async function main() {
@@ -41,7 +40,7 @@ async function main() {
   const sumFile = path.join(directory, 'SHA256SUMS');
   if (command === 'prepare') await fs.writeFile(sumFile, assets.checksums);
   else assert.equal(await fs.readFile(sumFile, 'utf8'), assets.checksums, 'Published release checksums do not match its packages');
-  if (command === 'publish') await publishAssets(assets, process.env.VSCE_PAT);
+  if (command === 'publish') await publishAssets(assets);
   console.log(`${command}: ${assets.packages.length} packages for ${manifest.publisher}.${manifest.name} ${manifest.version}`);
 }
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });
