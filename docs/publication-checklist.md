@@ -1,6 +1,6 @@
 # Publication checklist
 
-Prepared for Swagger Lens 0.3.8 on 2026-10-07. Checked items describe local and native CI evidence; unchecked items still need the Marketplace publishing account or a published listing.
+Release `0.4.0` is in preparation. The previous `0.3.8` release remains verified on all six Marketplace platforms; the historical checks below describe that release.
 
 ## Identity and repository
 
@@ -29,8 +29,18 @@ Prepared for Swagger Lens 0.3.8 on 2026-10-07. Checked items describe local and 
 
 ## Marketplace release
 
-- [ ] Verify that `Catomak` exists as a Marketplace publisher and that the publishing account has access. The provided ID alone does not prove account access.
-- [ ] Review the Marketplace listing rendered from README, CHANGELOG, and icon. Exact-name search found no Swagger Lens listing on 2026-10-07; this does not reserve the name.
-- [ ] Upload all six tested VSIX targets under the same extension/version, then install from Marketplace and check Preview/Diffs.
+- [x] Publisher `Catomak` exists, publishing access is confirmed by the owner, and `Catomak.swagger-lens` is public in Marketplace.
+- [ ] Review the published Marketplace listing rendered from README, CHANGELOG, and icon; review the updated summary when the next release is published.
+- [x] All six tested VSIX targets are uploaded under extension `Catomak.swagger-lens`, version `0.3.8`, and report `validated` through the public Marketplace API.
+- [ ] Install from Marketplace and check Preview/Diffs.
 
-Follow the official [publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) and [manifest reference](https://code.visualstudio.com/api/references/extension-manifest). This project prepares packages and CI artifacts; it does not automatically publish to Marketplace.
+Follow the official [publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) and [manifest reference](https://code.visualstudio.com/api/references/extension-manifest). Version-tag CI publishes a GitHub release after all six native jobs pass, then publishes its verified assets to Marketplace using the `VSCE_PAT` repository secret.
+
+## 0.4.0 release
+
+- [x] Release version and changelog prepared; agent rules define changelog maintenance and release-note extraction.
+- [x] Tag CI configured to wait for six native package/test jobs, publish a complete GitHub release, then publish the same Marketplace packages.
+- [ ] All six native `0.4.0` builds and installed-VSIX tests pass.
+- [ ] GitHub release `v0.4.0` contains all six VSIX packages, checksums, changelog notes, and tagged source archives.
+- [ ] Repository Actions secret `VSCE_PAT` configured and the Marketplace publish job succeeds.
+- [ ] All six Marketplace `0.4.0` platforms report validated.

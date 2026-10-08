@@ -1,8 +1,8 @@
 {
   "name": "swagger-lens",
   "displayName": "Swagger Lens",
-  "description": "Swagger preview with local OpenAPI diffs, affected endpoints, shared schemas, and light/dark themes.",
-  "version": "0.3.8",
+  "description": "Swagger preview and semantic OpenAPI diffs with efficient shared-schema imports for macOS, Windows, and Linux.",
+  "version": "0.4.0",
   "icon": "assets/icon.png",
   "publisher": "Catomak",
   "license": "Apache-2.0",
@@ -36,7 +36,7 @@
       "editor/title": [
         {
           "command": "swaggerLens.open",
-          "when": "resourceScheme =~ /^(file|git)$/ && resourceExtname =~ /\\.(json|ya?ml)$/",
+          "when": "(resourceScheme =~ /^(file|git|gl-review|pr|review)$/ && resourceExtname =~ /\\.(json|ya?ml)$/) || (resourceScheme == review && resourceFilename =~ /\\.(json|ya?ml)\\.git$/)",
           "group": "navigation@20"
         }
       ],
@@ -61,6 +61,87 @@
           "type": "string",
           "default": "",
           "description": "Optional absolute path to an oasdiff executable. Each platform build includes its own engine.",
+          "scope": "resource"
+        },
+        "swaggerLens.autoClosePreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Close Preview/Diffs when the last editor tab for its source contract closes.",
+          "scope": "resource"
+        },
+        "swaggerLens.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Refresh Preview/Diffs automatically when a contract or referenced schema is saved.",
+          "scope": "resource"
+        },
+        "swaggerLens.defaultMode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "preview",
+            "diff"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Follow the editor: Preview for ordinary files, Diffs for comparisons.",
+            "Always open in Preview.",
+            "Open in Diffs when a Git repository or a supported comparison is available; otherwise use Preview."
+          ],
+          "description": "Mode selected when opening a contract preview.",
+          "scope": "resource"
+        },
+        "swaggerLens.theme": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "light",
+            "dark"
+          ],
+          "default": "auto",
+          "description": "Preview color theme. Auto follows VS Code; the toolbar toggle saves your choice in this setting.",
+          "scope": "window"
+        },
+        "swaggerLens.changesOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "Initially show only affected operations in Diffs. The toolbar checkbox can override this for an open panel.",
+          "scope": "resource"
+        },
+        "swaggerLens.showChangesList": {
+          "type": "boolean",
+          "default": true,
+          "description": "Initially expand the affected-operations list in Diffs. The toolbar button can override this for an open panel.",
+          "scope": "resource"
+        },
+        "swaggerLens.docExpansion": {
+          "type": "string",
+          "enum": [
+            "list",
+            "full",
+            "none"
+          ],
+          "default": "list",
+          "enumDescriptions": [
+            "Expand tags, keeping operations collapsed.",
+            "Expand tags and operations.",
+            "Collapse tags and operations."
+          ],
+          "description": "Initial expansion of API tags and operations.",
+          "scope": "resource"
+        },
+        "swaggerLens.schemaExpandDepth": {
+          "type": "integer",
+          "default": 8,
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Initial depth of nested schema expansion.",
+          "scope": "resource"
+        },
+        "swaggerLens.tryItOutEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow Try it out to send requests in Preview. Requests are always disabled in Diffs.",
           "scope": "resource"
         }
       }

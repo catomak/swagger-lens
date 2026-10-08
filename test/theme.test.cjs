@@ -1,63 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-
-// Exercise the real extension message handlers with a small VS Code host.
-function host(kind, storage = new Map(), settings = {}) {
-  const panels = [], themeListeners = [];
-  let open;
-  const disposable = () => ({ dispose() {} });
-  const uri = file => ({ fsPath: file, scheme: 'file', toString: () => file });
-  const vscode = {
-    ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
-    Uri: { joinPath: (base, ...parts) => uri(path.join(base.fsPath, ...parts)) },
-    ViewColumn: { Beside: 2 },
-    commands: { registerCommand: (name, handler) => { open = handler; return disposable(); } },
-    workspace: {
-      isTrusted: true, textDocuments: [],
-      getConfiguration: section => ({
-        get: (name, fallback) => settings[`${section}.${name}`] ?? fallback,
-        inspect: name => ({ workspaceValue: settings[`${section}.${name}`] })
-      }),
-      onDidSaveTextDocument: disposable, onDidChangeTextDocument: disposable
-    },
-    window: {
-      activeColorTheme: { kind },
-      onDidChangeActiveColorTheme: listener => { themeListeners.push(listener); return disposable(); },
-      createOutputChannel: () => ({ ...disposable(), appendLine() {} }),
-      createWebviewPanel: () => {
-        const panel = { reveal() {}, messages: [], webview: { cspSource: 'test:', asWebviewUri: value => value } };
-        panel.webview.postMessage = message => { panel.messages.push(message); return Promise.resolve(true); };
-        panel.webview.onDidReceiveMessage = handler => { panel.send = handler; return disposable(); };
-        panel.onDidDispose = handler => { panel.dispose = handler; return disposable(); };
-        panels.push(panel);
-        return panel;
-      }
-    }
-  };
-  const context = {
-    subscriptions: [], extensionUri: uri('/extension'), extensionPath: '/extension',
-    globalState: { get: key => storage.get(key), update: async (key, value) => storage.set(key, value) }
-  };
-  const engine = {
-    findGitRoot: async () => null,
-    loadWorking: async file => ({ file }),
-    previewLoaded: loaded => ({ spec: {}, dependencies: [loaded.file] })
-  };
-  const module = { exports: {} };
-  const requireMock = name => name === 'vscode' ? vscode : name === './engine.cjs' ? engine : name === './editor-context.cjs'
-    ? { openingContext: (vscode, file) => ({ source: file, file, original: null, mode: 'preview' }), sourceLabel: () => 'HEAD' }
-    : name === './platform.cjs' ? require('../src/platform.cjs') : require(name);
-  vm.runInNewContext(fs.readFileSync(path.resolve('src/extension.cjs'), 'utf8'), { require: requireMock, module, Buffer, process, setTimeout, clearTimeout });
-  module.exports.activate(context);
-  return {
-    panels, storage,
-    async open(file) { await open(uri(file)); return panels.at(-1); },
-    changeTheme(kind) { vscode.window.activeColorTheme = { kind }; themeListeners.forEach(listener => listener({ kind })); }
-  };
-}
+const { host } = require('./mock-vscode.cjs');
 
 test('the initial preview theme follows VS Code, including both high contrast variants', async () => {
   for (const [kind, theme] of [[1, 'light'], [2, 'dark'], [3, 'dark'], [4, 'light']]) {

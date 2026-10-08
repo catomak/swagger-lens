@@ -1,10 +1,25 @@
 # Changelog
 
-A brief history of project changes, with the latest entries first.
+Release descriptions come from the matching version section below. Editing rules are in [AGENTS.md](https://github.com/catomak/swagger-lens/blob/master/AGENTS.md#change-tracking-and-releases).
 
 ## Unreleased
 
-- Use `macos-arm64` and `macos-x64` in VSIX filenames and CI artifact labels; preserve the required `darwin-*` target metadata.
+## 0.4.0 — 2026-10-08
+
+### Added
+
+- Preview and Diffs in GitLab merge requests and GitHub pull request/review editors, with commit-specific references, unchanged shared schemas, renamed files, and empty comparison sides.
+- Automatic preview closure when the last source-file tab closes, enabled by default through `swaggerLens.autoClosePreview`; duplicate source editors keep the preview open.
+- Settings for opening mode, automatic refresh, theme, change filters/list visibility, schema expansion, and Try it out, with live updates to open panels.
+- GitHub releases after all six native VSIX builds and installed-extension tests pass, with tested packages, SHA-256 checksums, tagged source archives, and descriptions from this changelog.
+- Automatic Marketplace publication of the same six release packages; retries skip already published platform versions.
+
+### Changed
+
+- Condensed README and moved detailed behavior and limitations to the usage guide; updated the extension summary to highlight preview, diffs, and shared-schema imports.
+- Preview errors now refer to files and the extension instead of contracts and a prototype.
+- macOS package filenames and artifact labels use `macos-*`; VS Code target metadata remains `darwin-*`.
+- Updated agent rules for focused changes, concise writing, proportionate checks, and changelog-based releases. Local VSIX packaging is reserved for release preparation; automatic CI builds remain enabled.
 
 ## 0.3.8 — 2026-10-07
 

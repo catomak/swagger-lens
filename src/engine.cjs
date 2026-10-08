@@ -17,7 +17,7 @@ async function git(root, args) {
 }
 
 function checkSpec(spec) {
-  if (!/^3\.[01]\.\d+$/.test(spec?.openapi || '')) throw new Error('This prototype supports OpenAPI 3.0.x and 3.1.x in JSON or YAML.');
+  if (!/^3\.[01]\.\d+$/.test(spec?.openapi || '')) throw new Error('This extension supports OpenAPI 3.0.x and 3.1.x in JSON or YAML.');
   if (!spec.info || typeof spec.info.title !== 'string' || typeof spec.info.version !== 'string' || (!spec.paths && (!spec.openapi.startsWith('3.1.') || (!spec.webhooks && !spec.components)))) throw new Error('The selected file is not a complete OpenAPI document.');
 }
 

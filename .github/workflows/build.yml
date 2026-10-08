@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
   release:
@@ -44,6 +44,12 @@ jobs:
           node-version: '24'
           architecture: ${{ endsWith(matrix.target, 'arm64') && 'arm64' || 'x64' }}
           cache: npm
+      - name: Validate release metadata
+        shell: bash
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/release-notes.cjs --tag "$RELEASE_TAG"
       - run: npm ci
       - name: Install Linux display dependencies
         if: runner.os == 'Linux'
@@ -71,3 +77,79 @@ jobs:
             builds/reports/*.json
             .build/**/vscode-test/logs/**
           if-no-files-found: warn
+
+  github-release:
+    name: Publish GitHub release
+    needs: release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          merge-multiple: true
+          path: release-assets
+      - name: Prepare notes and verified assets
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node scripts/release-notes.cjs --tag "$RELEASE_TAG" --output release-notes.md
+          node scripts/release-assets.cjs prepare "$RELEASE_TAG" release-assets
+      - name: Publish the complete release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > release-draft.txt; then
+            if [ "$(cat release-draft.txt)" = false ]; then
+              gh release download "$RELEASE_TAG" --dir existing-release --pattern '*.vsix' --pattern SHA256SUMS
+              node scripts/release-assets.cjs verify "$RELEASE_TAG" existing-release
+              echo "The complete release already exists; keeping its published assets."
+              exit 0
+            fi
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --target "$RELEASE_SHA" --draft --title "Swagger Lens $RELEASE_TAG" --notes-file release-notes.md
+          fi
+          gh release upload "$RELEASE_TAG" release-assets/*.vsix release-assets/SHA256SUMS --clobber
+          gh release edit "$RELEASE_TAG" --draft=false --latest --title "Swagger Lens $RELEASE_TAG" --notes-file release-notes.md
+
+  marketplace:
+    name: Publish VS Code Marketplace
+    needs: github-release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    concurrency:
+      group: marketplace-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Download the published release packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release download "$RELEASE_TAG" --dir release-assets --pattern '*.vsix' --pattern SHA256SUMS
+      - name: Verify and publish all six packages
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/release-assets.cjs publish "$RELEASE_TAG" release-assets

@@ -1,6 +1,8 @@
 # Build and test flow
 
-## Local release
+## Local GitHub release preparation
+
+Create local VSIX packages only when preparing a GitHub release. Ordinary development uses source-only checks with an existing native oasdiff engine. GitHub Actions continues packaging and testing automatically through the existing workflow.
 
 Install Node.js 22.19+ (CI uses Node.js 24), npm, Git, and `tar`. Run these commands from the project root:
 
@@ -17,7 +19,7 @@ The release command builds and tests the host's package. It downloads oasdiff 1.
 4. Downloads official stable VS Code, installs the VSIX in an isolated profile, and tests the installed extension with real webviews and disposable Git repositories.
 5. Writes JSON reports to `builds/reports/`. Any failed step exits with a nonzero status.
 
-The installed-package tests verify OpenAPI 3.1 JSON and split YAML reference resolution in real webviews, imports of small fragments from large neighboring contracts, Preview/Diffs switches, Git revision/index comparisons with version-specific dependencies, added files, engine-error recovery, and saved dependency refreshes. Unit tests cover semantic diffs, nested highlighting, selective dependency loading, schemas and constraints, themes, and executable architecture checks. These checks do not perform API requests or measure every visual layout or VS Code version.
+The installed-package tests verify OpenAPI 3.1 JSON and split YAML reference resolution in real webviews, imports of small fragments from large neighboring contracts, Preview/Diffs switches, Git revision/index comparisons with version-specific dependencies, added files, engine-error recovery, saved dependency refreshes, source-tab auto closure across editor groups and comparisons, and live preview settings in real Swagger UI controls. Unit tests cover semantic diffs, nested highlighting, selective dependency loading, schemas and constraints, themes, and executable architecture checks. These checks do not perform API requests or measure every visual layout or VS Code version.
 
 An explicit native target works too:
 
@@ -77,9 +79,25 @@ The workflow runs on pull requests, pushes to `main`/`master`, version tags begi
 | `linux-x64` | `linux-x64` | `ubuntu-24.04` |
 | `linux-arm64` | `linux-arm64` | `ubuntu-24.04-arm` |
 
-Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<filename-suffix>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Packages are not published to the Marketplace.
+Each runner builds its own package and runs the complete native release flow. The host and the extension host must match the declared target. No cross-CPU emulation is used. Successful jobs upload a `vsix-<filename-suffix>` artifact; JSON reports and VS Code logs are uploaded even when tests fail. Version-tag runs publish a GitHub release and then upload the same verified packages to Marketplace. Branch and pull-request runs only build and test.
 
 All six standard runners are listed for public and private repositories. Standard hosted-runner usage is free for public repositories. Private repositories use the account's included minutes and then incur charges. See GitHub's [runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) and [billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+
+## Automated publication
+
+For a release, update the version in `package.json` and both root entries in `package-lock.json`. Move the changes being shipped from `Unreleased` into `## <version> — YYYY-MM-DD` in `CHANGELOG.md`; its body is the release description. Validate it before creating the tag:
+
+```sh
+node scripts/release-notes.cjs --tag v0.4.0
+```
+
+After the authorized release commit, push the matching version tag (for example `v0.4.0`). The tag workflow waits for all six native package/test jobs, validates the complete platform set, and creates a draft GitHub release. It uploads six VSIX files and `SHA256SUMS`, then publishes the completed release. GitHub supplies source ZIP and tar archives from the tag. A retry preserves a complete published release; it can resume an incomplete draft.
+
+The Marketplace job runs after GitHub publication in the same workflow: releases created with `GITHUB_TOKEN` do not trigger separate release-event workflows. It downloads the published assets, verifies their checksums and extension identity/version/targets, and publishes all six using the pinned `@vscode/vsce`. It does not rebuild packages. Marketplace validation is asynchronous; successful upload is not a claim that all platforms are already validated.
+
+One-time setup: add the repository Actions secret **VSCE_PAT** in **Settings → Secrets and variables → Actions → New repository secret**. Use an Azure DevOps token for the Microsoft account authorized for publisher **Catomak**, with **Marketplace: Manage** and **All accessible organizations**. Keep the token out of source files, workflow text, and chat. CI exposes it only to the publish step. Follow the [official authentication guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publishing-extensions) for current token/identity requirements; global PAT retirement is scheduled for December 1, 2026.
+
+If publication fails, fix the reported issue or credential and use **Actions → failed tag run → Re-run failed jobs**. Already published version/platform pairs are skipped, so a partial Marketplace upload can be resumed. GitHub release assets are kept unchanged. Ordinary branch or pull-request builds never publish.
 
 ## Versions
 

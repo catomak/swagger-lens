@@ -24,6 +24,8 @@ const saveViewState = (key, value) => {
   if (vscode) vscode.setState({ ...vscode.getState(), [key]: value });
   else sessionStorage.setItem(`${demoStateKey}:${key}`, String(value));
 };
+const defaultSettings = { changesOnly: true, showChangesList: true, docExpansion: 'list', schemaExpandDepth: 8, tryItOutEnabled: true };
+const initialSettings = { ...defaultSettings, ...(vscode ? JSON.parse(document.body.dataset.settings || '{}') : {}) };
 const statuses = { added: 'Added', deleted: 'Removed', updated: 'Modified' };
 const format = value => value === undefined ? '∅' : typeof value === 'string' ? value : JSON.stringify(value);
 const operationKey = op => `${op.scope || 'paths'}:${op.method}:${op.path}`;
@@ -102,8 +104,11 @@ function App() {
   const [busy, setBusy] = useState(!data);
   const [dirty, setDirty] = useState(false);
   const [theme, setTheme] = useState(initialTheme);
-  const [changedOnly, setChangedOnly] = useState(vscode ? vscode.getState()?.changedOnly ?? true : sessionStorage.getItem(`${demoStateKey}:changedOnly`) !== 'false');
-  const [changesExpanded, setChangesExpanded] = useState(vscode ? vscode.getState()?.changesExpanded ?? true : sessionStorage.getItem(`${demoStateKey}:changesExpanded`) !== 'false');
+  const [settings, setSettings] = useState(initialSettings);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const [changedOnly, setChangedOnly] = useState(vscode ? vscode.getState()?.changedOnly ?? initialSettings.changesOnly : sessionStorage.getItem(`${demoStateKey}:changedOnly`) !== 'false');
+  const [changesExpanded, setChangesExpanded] = useState(vscode ? vscode.getState()?.changesExpanded ?? initialSettings.showChangesList : sessionStorage.getItem(`${demoStateKey}:changesExpanded`) !== 'false');
   const [selected, setSelected] = useState(null);
   const selectedRef = useRef(null);
   const modeRef = useRef(status.mode);
@@ -117,7 +122,27 @@ function App() {
       if (event.data.type === 'busy') { setStatus(event.data); setBusy(true); setError(''); }
       if (event.data.type === 'error') { setStatus(event.data); setError(event.data.error); setBusy(false); }
       if (event.data.type === 'dirty') setDirty(event.data.dirty);
+      if (event.data.type === 'settings') {
+        setSettings(event.data.settings);
+        if (event.data.reset?.includes('changesOnly')) {
+          setChangedOnly(event.data.settings.changesOnly);
+          saveViewState('changedOnly', event.data.settings.changesOnly);
+        }
+        if (event.data.reset?.includes('showChangesList')) {
+          setChangesExpanded(event.data.settings.showChangesList);
+          saveViewState('changesExpanded', event.data.settings.showChangesList);
+        }
+      }
       // Installed-package tests click real controls instead of invoking Swagger internals.
+      if (event.data.type === 'testInspect') send('viewState', { state: {
+        theme: document.documentElement.dataset.theme,
+        changesOnly: document.querySelector('.api-tools input')?.checked,
+        changesExpanded: Boolean(document.querySelector('.api-sidebar:not([hidden])')),
+        operations: document.querySelectorAll('.swagger-ui .opblock').length,
+        expandedOperations: document.querySelectorAll('.swagger-ui .opblock.is-open').length,
+        tryOutButtons: document.querySelectorAll('.swagger-ui .try-out__btn').length,
+        baseDisabled: [...document.querySelectorAll('.api-tools button')].find(button => button.textContent.startsWith('Base:'))?.disabled
+      } });
       if (event.data.type === 'testClick' && typeof event.data.selector === 'string') {
         [...document.querySelectorAll(event.data.selector)].find(element => element.textContent.trim().startsWith(event.data.text || ''))?.click();
       }
@@ -173,7 +198,7 @@ function App() {
           <button className="api-mode" aria-pressed={diffs} disabled={!status.diffAvailable} title={status.diffAvailable ? 'Compare API changes' : status.diffUnavailableReason || 'Checking Git availability…'} onClick={() => changeMode('diff')}>Diffs</button>
         </div>
         <label className={!diffs ? 'api-disabled' : ''}><input type="checkbox" checked={diffs && changedOnly} disabled={!diffs || busy} onChange={event => changeFilter(event.target.checked)} />Changes only</label>
-        {vscode && <><button disabled={!diffs || busy} title={status.comparisonSource === 'editor' ? 'Using the left version of the VS Code comparison. You can select another Git base.' : 'Select a branch, tag, or commit'} onClick={() => send('base')}>Base: {status.baseRef || 'HEAD'}</button><button onClick={() => send('refresh')}>Refresh</button></>}
+        {vscode && <><button disabled={!diffs || busy || !status.canSelectBase} title={status.comparisonSource === 'editor' ? `Using the left version of the comparison.${status.canSelectBase ? ' You can select another Git base.' : ''}` : 'Select a branch, tag, or commit'} onClick={() => send('base')}>Base: {status.baseRef || 'HEAD'}</button><button onClick={() => send('refresh')}>Refresh</button></>}
       </div>
       <button className="api-theme-toggle" aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} aria-pressed={theme === 'dark'} onClick={toggleTheme}>
         <svg viewBox="0 0 24 24" aria-hidden="true">{theme === 'dark'
@@ -186,7 +211,7 @@ function App() {
     {!error && diffs && data?.revisionMissing && <div className="api-notice">The right version is empty. All operations are shown as removed.</div>}
     {!error && diffs && data?.warnings?.map(warning => <div className="api-notice" key={warning}>{warning}</div>)}
     {busy && <div className="api-notice">{diffs ? 'Computing changes…' : 'Loading preview…'}</div>}
-    {error && <div className="api-error"><b>{diffs ? 'Could not compare the contract' : 'Could not open the contract'}</b><pre>{error}</pre></div>}
+    {error && <div className="api-error"><b>{diffs ? 'Could not compare the contract' : 'Could not preview the file'}</b><pre>{error}</pre></div>}
     {data && <div className={`api-layout ${diffs ? 'api-diff' : 'api-preview'} ${diffs && !changesExpanded ? 'api-sidebar-collapsed' : ''}`} style={error ? { display: 'none' } : undefined} aria-busy={busy}>
       {diffs && <aside className="api-sidebar" id="api-changes" hidden={!changesExpanded}>
         <div className="api-sidebar-header">
@@ -202,7 +227,7 @@ function App() {
         </button>)}
         {globalChanges.length > 0 && <details className="api-global"><summary>Global changes ({globalChanges.length})</summary>{globalChanges.map((change, index) => <p key={index}>{change.text}</p>)}</details>}
       </aside>}
-      <main><SwaggerUI spec={renderedSpec} plugins={plugins.current} docExpansion="list" defaultModelRendering="model" defaultModelExpandDepth={8} defaultModelsExpandDepth={diffs ? -1 : 1} supportedSubmitMethods={diffs ? [] : submitMethods} requestInterceptor={request => { if (modeRef.current === 'diff') throw new Error('Sending requests is disabled in Diff mode.'); return request; }} validatorUrl={null} displayOperationId={true} onComplete={() => { if (diffs && selectedRef.current) requestAnimationFrame(() => focusOperation(selectedRef.current)); }} />
+      <main><SwaggerUI spec={renderedSpec} plugins={plugins.current} docExpansion={settings.docExpansion} defaultModelRendering="model" defaultModelExpandDepth={settings.schemaExpandDepth} defaultModelsExpandDepth={diffs ? -1 : 1} supportedSubmitMethods={diffs || !settings.tryItOutEnabled ? [] : submitMethods} requestInterceptor={request => { if (modeRef.current === 'diff' || !settingsRef.current.tryItOutEnabled) throw new Error('Sending requests is disabled for this view.'); return request; }} validatorUrl={null} displayOperationId={true} onComplete={() => { if (diffs && selectedRef.current) requestAnimationFrame(() => focusOperation(selectedRef.current)); }} />
         {diffs && !data.operations.length && changedOnly && <p className="api-empty">No operations have changed. Uncheck “Changes only” to view the entire contract.</p>}
       </main>
     </div>}
