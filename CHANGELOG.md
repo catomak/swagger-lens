@@ -4,7 +4,7 @@ Release descriptions come from the matching version section below. Editing rules
 
 ## Unreleased
 
-- Documented required Azure DevOps service-principal enrollment before Marketplace profile lookup; missing-profile errors now explain the setup step.
+- Documented required Azure DevOps service-principal enrollment and directory checks before Marketplace profile lookup, including the subscription requirement for new organizations; missing-profile errors now explain the setup step.
 
 - Corrected federated-credential setup to match this repository's GitHub OIDC subject, including immutable owner and repository IDs.
 
