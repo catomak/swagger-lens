@@ -109,13 +109,17 @@ The owner must have a Microsoft Entra tenant and permission to register an appli
    | Field | Value |
    | --- | --- |
    | Organization | `catomak` |
+   | Organization ID | `39189471` (GitHub owner ID) |
    | Repository | `swagger-lens` |
+   | Repository ID | `1408835693` |
    | Entity type | Environment |
    | Environment | `marketplace` |
    | Name | `github-swagger-lens-marketplace` |
    | Issuer | `https://token.actions.githubusercontent.com` |
-   | Subject | `repo:catomak/swagger-lens:environment:marketplace` |
+   | Subject | `repo:catomak@39189471/swagger-lens@1408835693:environment:marketplace` |
    | Audience | `api://AzureADTokenExchange` |
+
+   These GitHub IDs and the immutable subject prefix were verified with the repository API on 2026-10-08. After selecting Environment and entering `marketplace`, confirm that the generated Subject matches the table. Re-check `gh api repos/catomak/swagger-lens/actions/oidc/customization/sub` if the repository is renamed, transferred, or its OIDC settings change. See [GitHub immutable subject claims](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims).
 
 3. The repository environment **marketplace** is prepared under GitHub **Settings → Environments**, allowing tags `v*` and branch `master`; the latter permits retrying an existing release through the explicit manual option. Do not add a required reviewer if publication must remain automatic.
 4. Under **Settings → Secrets and variables → Actions → Repository secrets**, add **AZURE_CLIENT_ID** and **AZURE_TENANT_ID** with the two recorded IDs. They identify the app and directory; they are not access tokens. `VSCE_PAT` is unused.
