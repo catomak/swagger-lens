@@ -1,6 +1,6 @@
 # Icon concepts
 
-These editable concepts share the green circle and Swagger-style braces. The current extension icon remains unchanged.
+These editable concepts share the green circle and Swagger-style braces. The green-and-black smile is the selected extension icon.
 
 | Concept | SVG source | PNG preview |
 | --- | --- | --- |
@@ -11,7 +11,9 @@ These editable concepts share the green circle and Swagger-style braces. The cur
 
 The green-and-black PNG is selected as the extension icon and copied to `../icon.png`. Concept files remain in the project and are excluded from the VSIX.
 
-The two `{ツ}` PNG concepts were made with the built-in image generation tool. Their SVGs are clean geometric redraws with flat fills, rounded strokes, matching geometry, and no font dependencies; they are not pixel-identical traces of the PNGs. The smile and braces remain editable paths.
+The selected green-and-black PNG is rendered from its SVG source. It has a transparent background outside the green circle, an 8-unit black circular outline, 8-unit braces and eyes, and a 9-unit smile on the 256-unit canvas. The smile and braces remain editable paths.
+
+The green-and-white PNG was generated during earlier exploration; its SVG is an editable geometric redraw.
 
 The diff concepts replace the smile with opposing arrow paths and ring nodes. `diff-eyes.svg` rotates that mark 90 degrees clockwise and adds pupils facing toward the arrows.
 

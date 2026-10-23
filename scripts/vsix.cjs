@@ -55,6 +55,7 @@ async function verifyVsix(file, target, stage) {
   get('extension/THIRD-PARTY/README.md');
   assert.equal(packaged.icon, 'assets/icon.png');
   const icon = get('extension/assets/icon.png').data;
+  assert.ok(icon.length <= 1024 * 1024, 'The Marketplace icon must not exceed 1024 KB');
   assert.ok(icon.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])));
   assert.ok(icon.readUInt32BE(16) >= 128 && icon.readUInt32BE(16) === icon.readUInt32BE(20));
   const binaries = [...files.keys()].filter(name => name.startsWith('extension/bin/'));

@@ -4,9 +4,15 @@ Release descriptions come from the matching version section below. Editing rules
 
 ## Unreleased
 
+## 0.4.2 — 2026-10-24
+
 ### Changed
 
 - Use a transparent icon background with a black circular outline and thinner braces and smile.
+
+### Fixed
+
+- Keep the packaged icon below the Marketplace 1024 KB limit and reject oversized icons during package verification.
 
 ## 0.4.1 — 2026-10-24
 
