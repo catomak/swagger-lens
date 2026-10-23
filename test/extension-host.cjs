@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 async function waitFor(predicate, message) {
   const deadline = Date.now() + 25000;
   while (!await predicate()) {
@@ -143,6 +144,45 @@ async function runTests() {
   assert.ok(data.spec.paths['/staged-only']); assert.ok(!data.spec.paths['/working-only']);
   assert.deepEqual(previewEnum(data), ['v4']);
   cases.push('HEAD-to-index comparison, changing the base and Preview keep the actual right snapshot');
+
+  const missingReference = vscode.Uri.file(fixture.missingReference);
+  const missingIndex = gitUri(missingReference, '');
+  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(missingIndex), { viewColumn: vscode.ViewColumn.One, preview: false });
+  await vscode.commands.executeCommand('swaggerLens.open', missingIndex);
+  for (const mode of ['preview', 'diff', 'preview']) {
+    await api.setMode(missingIndex, mode);
+    await waitFor(() => api.getPreview(missingIndex)?.ready && !api.getPreview(missingIndex)?.busy, 'Missing INDEX reference did not settle');
+    await api.inspectPreview(missingIndex);
+    await waitFor(() => api.getPreview(missingIndex).viewState, 'The real error panel did not respond');
+    const state = api.getPreview(missingIndex);
+    assert.equal(state.mode, mode);
+    assert.match(state.viewState.error, /common-errors\.json/);
+    assert.match(state.viewState.error, /INDEX/);
+    assert.equal(state.viewState.operations, 0);
+  }
+  cases.push('missing INDEX dependencies show their path and revision in the real Preview and Diffs error panel');
+
+  const recoveredSchema = path.join(fixture.root, 'common-errors.json');
+  await fs.writeFile(recoveredSchema, JSON.stringify({ Item: {
+    type: 'object', properties: { status: { type: 'string', enum: ['INDEX_RECOVERED'] } }
+  } }));
+  execFileSync('git', ['-C', fixture.root, 'add', '--', 'common-errors.json']);
+  await gitAPI.getRepository(missingReference).status();
+  for (const mode of ['preview', 'diff']) {
+    await api.setMode(missingIndex, mode);
+    await waitFor(() => api.getPreview(missingIndex)?.ready && !api.getPreview(missingIndex)?.busy, 'Recovered INDEX reference did not settle');
+    const state = api.getPreview(missingIndex);
+    assert.equal(state.error, null);
+    assert.deepEqual(previewEnum(state.data), ['INDEX_RECOVERED']);
+    await api.inspectPreview(missingIndex);
+    await waitFor(async () => {
+      if (api.getPreview(missingIndex).viewState?.operations > 0) return true;
+      await api.inspectPreview(missingIndex);
+      return false;
+    }, 'Recovered INDEX schema did not render');
+    assert.equal(api.getPreview(missingIndex).viewState.error, '');
+  }
+  cases.push('staging a missing dependency restores the real INDEX schema in Preview and Diffs');
 
   const unstaged = vscode.Uri.file(fixture.unstaged);
   await openDiff(gitUri(unstaged, '~'), unstaged);

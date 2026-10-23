@@ -188,3 +188,73 @@ test('an invalid revision and a missing committed dependency remain errors, not 
   commit();
   await assert.rejects(compareFile(file, 'HEAD', binary), /models\.json/);
 });
+
+function renamedPathFixture(version = '3.1.0') {
+  return {
+    openapi: version, info: { title: 'Path rename API', version: '1' },
+    paths: { '/jobs/{jobId}': {
+      parameters: [{ in: 'path', name: 'jobId', required: true, schema: { type: 'string' } }],
+      get: { responses: { 200: { description: 'OK', content: { 'application/json': { schema: {
+        type: 'object', properties: { state: { type: 'string', enum: ['pending'] } }
+      } } } } } }
+    } }
+  };
+}
+
+function renamePath(spec) {
+  const item = spec.paths['/jobs/{jobId}'];
+  delete spec.paths['/jobs/{jobId}'];
+  spec.paths['/jobs/{code}'] = item;
+  item.parameters[0].name = 'code';
+  return item;
+}
+
+for (const version of ['3.0.3', '3.1.0']) test(`${version}: renamed path parameters with a replaced method preserve both endpoints and their own parameters`, async t => {
+  const before = renamedPathFixture(version), after = clone(before);
+  const item = renamePath(after);
+  delete item.get;
+  item.post = { responses: { 201: { description: 'Created' } } };
+  const result = await pair(t, before, after);
+  assert.deepEqual(result.operations.map(op => [op.path, op.method, op.status]).sort(), [
+    ['/jobs/{code}', 'post', 'added'], ['/jobs/{jobId}', 'get', 'deleted']
+  ]);
+  const added = result.spec.paths['/jobs/{code}'].post, removed = result.spec.paths['/jobs/{jobId}'].get;
+  assert.equal(added['x-diff-status'], 'added');
+  assert.equal(removed['x-diff-status'], 'deleted');
+  assert.deepEqual(added.parameters.map(p => [p.name, p['x-diff-status']]), [['code', 'added']]);
+  assert.deepEqual(removed.parameters.map(p => [p.name, p['x-diff-status']]), [['jobId', 'deleted']]);
+  assert.equal(result.spec.paths['/jobs/{jobId}'].post, undefined);
+  assert.equal(result.spec.paths['/jobs/{code}'].get, undefined);
+  assert.ok(result.operations.find(op => op.status === 'added').changes.some(c => c.id === 'endpoint-added'));
+  assert.ok(result.operations.find(op => op.status === 'deleted').changes.some(c => c.id === 'api-removed-without-deprecation'));
+  assert.deepEqual(before, renamedPathFixture(version));
+  assert.deepEqual(after.paths['/jobs/{code}'].post, item.post, 'annotation must not mutate the current contract');
+});
+
+test('a renamed path keeps its modified operation and nested highlights at the current address', async t => {
+  const before = renamedPathFixture(), after = clone(before);
+  const item = renamePath(after);
+  item.get.responses[200].content['application/json'].schema.properties.state.enum.push('done');
+  const result = await pair(t, before, after);
+  assert.deepEqual(result.operations.map(op => [op.path, op.method, op.status]), [['/jobs/{code}', 'get', 'updated']]);
+  assert.equal(result.spec.paths['/jobs/{jobId}'], undefined, 'do not duplicate the matched operation at the old address');
+  const property = result.spec.paths['/jobs/{code}'].get.responses[200].content['application/json'].schema.properties.state;
+  assert.equal(property['x-diff-status'], 'updated');
+  assert.deepEqual(property['x-diff-details'], [{ key: 'enum', before: ['pending'], after: ['pending', 'done'] }]);
+  assert.ok(result.operations[0].changes.some(c => c.id === 'response-property-enum-value-added'));
+});
+
+test('restoring a removed method at a renamed path does not duplicate surviving methods', async t => {
+  const before = renamedPathFixture();
+  before.paths['/jobs/{jobId}'].post = { responses: { 201: { description: 'Created' } } };
+  const after = clone(before), item = renamePath(after);
+  delete item.get;
+  const result = await pair(t, before, after);
+  assert.deepEqual(result.operations.map(op => [op.path, op.method, op.status]).sort(), [
+    ['/jobs/{code}', 'post', 'updated'], ['/jobs/{jobId}', 'get', 'deleted']
+  ]);
+  assert.equal(result.spec.paths['/jobs/{jobId}'].post, undefined);
+  assert.equal(result.spec.paths['/jobs/{code}'].get, undefined);
+  assert.equal(result.spec.paths['/jobs/{code}'].post['x-diff-status'], 'updated');
+  assert.deepEqual(result.spec.paths['/jobs/{jobId}'].get.parameters.map(p => p.name), ['jobId']);
+});

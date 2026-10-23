@@ -4,11 +4,18 @@ Release descriptions come from the matching version section below. Editing rules
 
 ## Unreleased
 
-- Documented required Azure DevOps service-principal enrollment and directory checks before Marketplace profile lookup, including the subscription requirement for new organizations; missing-profile errors now explain the setup step.
+## 0.4.1 — 2026-10-24
 
-- Corrected federated-credential setup to match this repository's GitHub OIDC subject, including immutable owner and repository IDs.
+### Fixed
 
-- Replaced PAT-based Marketplace publishing with GitHub OIDC and Microsoft Entra ID. Added an explicit retry of the current GitHub release without rebuilding its packages.
+- Show missing Git snapshot dependencies with their file path and revision instead of a blank Preview/Diffs panel, including errors with empty messages from VS Code's Git provider.
+- Open historical files inside removed or renamed directories by finding Git from the nearest existing parent; keep shared schemas tied to the selected revision.
+- Compare renamed path parameters correctly, preserving added/removed methods, revision-specific parameters, change descriptions, and nested highlights.
+
+### Changed
+
+- Publish Marketplace packages through GitHub OIDC and Microsoft Entra ID, with an explicit retry of an existing release without rebuilding.
+- Document required Azure DevOps enrollment, directory checks, new-organization subscription requirements, and this repository's immutable GitHub OIDC subject.
 
 ## 0.4.0 — 2026-10-08
 

@@ -26,7 +26,13 @@ async function loadSource(uri, allowEmpty = false, options) {
   const snapshot = uri.with({ query: JSON.stringify(params) });
   const read = ['pr', 'review'].includes(uri.scheme) ? await githubSnapshotReader(vscode, uri)
     : dependency => vscode.workspace.fs.readFile(snapshotDependencyUri(vscode, snapshot, dependency));
-  return loadSnapshot(file, content, read, options);
+  return loadSnapshot(file, content, async dependency => {
+    try { return await read(dependency); }
+    catch (error) {
+      const relative = path.relative(path.dirname(file), dependency).split(path.sep).join('/');
+      throw new Error(`Could not read referenced file "${relative}" from ${sourceLabel(snapshot)}.${error.message ? `\n${error.message}` : ''}`, { cause: error });
+    }
+  }, options);
 }
 
 function activate(context) {
@@ -133,9 +139,9 @@ function activate(context) {
       } catch (error) {
         if (sequence !== state.sequence) return;
         state.busy = false;
-        state.error = error.message;
-        post({ type: 'error', error: error.message, ...status() });
-        output.appendLine(error.stack || error.message);
+        state.error = error.message || `Could not load "${path.basename(file.fsPath)}" from ${sourceLabel(source)}.`;
+        post({ type: 'error', error: state.error, ...status() });
+        output.appendLine(error.stack || state.error);
       }
     };
     const setMode = state.setMode = async mode => {

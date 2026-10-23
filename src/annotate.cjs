@@ -123,17 +123,34 @@ function affectedOperations(diff, oldSpec, newSpec, scope = 'paths') {
   return affected;
 }
 
+function pathLookup(paths = {}) {
+  // oasdiff matches endpoints without their path-parameter names and reports
+  // the base address. Resolve that address independently on each side.
+  const identity = name => name.replace(/\{[^{}]+\}/g, '{}');
+  const names = new Map(Object.keys(paths).map(name => [identity(name), name]));
+  return name => Object.hasOwn(paths, name) ? name : names.get(identity(name)) || name;
+}
+
 function annotate(oldSpec, newSpec, diff, changelog = []) {
   const spec = clone(newSpec), operations = [...affectedOperations(diff, oldSpec, newSpec), ...affectedOperations(diff, oldSpec, newSpec, 'webhooks')];
   spec.paths = clone(newSpec.paths || {});
   if (oldSpec.webhooks || newSpec.webhooks) spec.webhooks = clone(newSpec.webhooks || {});
+  const lookups = Object.fromEntries(['paths', 'webhooks'].map(scope => [scope, {
+    before: pathLookup(oldSpec[scope]), after: pathLookup(newSpec[scope])
+  }]));
   for (const op of operations) {
-    const beforePath = oldSpec[op.scope]?.[op.path], afterPath = newSpec[op.scope]?.[op.path];
-    if (!Object.hasOwn(spec[op.scope], op.path)) set(spec[op.scope], op.path, clone(afterPath || beforePath));
-    const operation = annotateOperation(beforePath?.[op.method], afterPath?.[op.method], beforePath, afterPath);
+    const changePath = op.scope === 'webhooks' ? `webhook:${op.path}` : op.path;
+    const beforeName = lookups[op.scope].before(op.path), afterName = lookups[op.scope].after(op.path);
+    const beforePath = oldSpec[op.scope]?.[beforeName], afterPath = newSpec[op.scope]?.[afterName];
+    const before = beforePath?.[op.method], after = afterPath?.[op.method];
+    op.path = op.status === 'deleted' ? beforeName : afterName;
+    if (!Object.hasOwn(spec[op.scope], op.path)) {
+      const item = clone(op.status === 'deleted' ? beforePath : afterPath);
+      set(spec[op.scope], op.path, Object.fromEntries(entries(item).filter(([key]) => !methods.includes(key))));
+    }
+    const operation = annotateOperation(before, after, before ? beforePath : undefined, after ? afterPath : undefined);
     mark(operation, op.status);
     set(spec[op.scope][op.path], op.method, operation);
-    const changePath = op.scope === 'webhooks' ? `webhook:${op.path}` : op.path;
     op.changes = changelog.filter(change => change.path === changePath && change.operation?.toLowerCase() === op.method);
   }
   if (oldSpec.components?.schemas || newSpec.components?.schemas) {

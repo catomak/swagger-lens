@@ -45,7 +45,13 @@ async function main() {
   for (let index = 0; index < 1000; index++) schemas[`Unused${index}`] = { type: 'object', properties: { unrelated: { type: 'string', description: 'Unrelated schema' } } };
   await fs.writeFile(fragment, YAML.stringify(small));
   await fs.writeFile(neighbor, JSON.stringify({ ...base, components: { schemas } }, null, 2));
-  const fixture = { root, file, model, unstaged, added, outside, outsideModel, openapi31, yaml31: path.join(yaml31, 'openapi.yaml'), fragment, neighbor };
+  const missingReference = path.join(root, 'missing-reference.json');
+  const broken = structuredClone(base);
+  broken.paths['/items'].get.responses[200].content['application/json'].schema.$ref = './common-errors.json#/Item';
+  await fs.writeFile(missingReference, JSON.stringify(broken));
+  git(['add', '--', 'missing-reference.json']);
+  await fs.writeFile(missingReference, JSON.stringify(base));
+  const fixture = { root, file, model, unstaged, added, outside, outsideModel, openapi31, yaml31: path.join(yaml31, 'openapi.yaml'), fragment, neighbor, missingReference };
   await fs.writeFile(path.join(destination, 'fixture.json'), JSON.stringify(fixture, null, 2));
   console.log(JSON.stringify(fixture));
 }

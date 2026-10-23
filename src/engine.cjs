@@ -53,7 +53,16 @@ async function loadSnapshot(file, content, readFile, { expand = true } = {}) {
 }
 
 async function findGitRoot(file) {
-  try { return await git(path.dirname(file), ['rev-parse', '--show-toplevel']); }
+  // Historical editors can refer to directories removed from the working tree.
+  let directory = path.dirname(path.resolve(file));
+  for (;;) {
+    try { if ((await fs.stat(directory)).isDirectory()) break; }
+    catch (error) { if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error; }
+    const parent = path.dirname(directory);
+    if (parent === directory) return null;
+    directory = parent;
+  }
+  try { return await git(directory, ['rev-parse', '--show-toplevel']); }
   catch (error) {
     if (error.code === 'ENOENT' || /not a git repository/i.test(error.stderr || '')) return null;
     throw error;

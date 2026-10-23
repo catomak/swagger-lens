@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const YAML = require('yaml');
-const { previewFile, loadSnapshot, compareLoaded, compareTwoFiles } = require('../src/engine.cjs');
+const { previewFile, loadSnapshot, loadRevision, loadWorking, findGitRoot, compareLoaded, compareTwoFiles } = require('../src/engine.cjs');
 const binary = require('./binary.cjs');
 const spec = (version = '3.0.3') => ({ openapi: version, info: { title: 'Preview API', version: '1' }, paths: { '/current': { get: { responses: { 200: { description: 'OK' } } } } } });
 async function folder(t) {
@@ -95,4 +95,46 @@ test('empty sides in a VS Code comparison represent added or deleted APIs', asyn
   const deleted = await compareLoaded(loaded, null, binary);
   assert.equal(deleted.revisionMissing, true);
   assert.equal(deleted.operations[0].status, 'deleted');
+});
+
+
+test('Git snapshots retain sibling schemas after their source directory is renamed', async t => {
+  const root = await folder(t), services = path.join(root, 'Internal Services');
+  const oldDirectory = path.join(services, 'Customer Profile (Raw draft)');
+  const currentDirectory = path.join(services, 'Customer Profile');
+  const historicalFile = path.join(oldDirectory, 'api.json'), currentFile = path.join(currentDirectory, 'api.json');
+  const shared = path.join(services, 'common-schemas-api.json');
+  const current = spec('3.1.0');
+  current.paths['/current'].get.responses['200'].content = {
+    'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } }
+  };
+  current.components = { schemas: { ErrorResponse: { $ref: '../common-schemas-api.json#/components/schemas/ErrorResponse' } } };
+  const common = { components: { schemas: { ErrorResponse: {
+    type: 'object', properties: { code: { type: 'string', enum: ['original'] } }
+  } } } };
+  await fs.mkdir(oldDirectory, { recursive: true });
+  await fs.writeFile(historicalFile, JSON.stringify(current));
+  await fs.writeFile(shared, JSON.stringify(common));
+  execFileSync('git', ['-C', root, 'init', '-q']);
+  execFileSync('git', ['-C', root, 'add', '.']);
+  execFileSync('git', ['-C', root, '-c', 'user.name=Test', '-c', 'user.email=test@example.test', 'commit', '-qm', 'Initial API']);
+  await fs.rename(oldDirectory, currentDirectory);
+  common.components.schemas.ErrorResponse.properties.code.enum.push('working');
+  await fs.writeFile(shared, JSON.stringify(common));
+
+  const gitRoot = await findGitRoot(historicalFile);
+  assert.equal(gitRoot, await fs.realpath(root));
+  const historical = await loadRevision(gitRoot, 'HEAD', 'Internal Services/Customer Profile (Raw draft)/api.json');
+  const working = await loadWorking(currentFile);
+  const schema = loaded => loaded.expanded.paths['/current'].get.responses['200'].content['application/json'].schema;
+  assert.deepEqual(schema(historical).properties.code.enum, ['original']);
+  assert.deepEqual(schema(working).properties.code.enum, ['original', 'working']);
+  assert.deepEqual(working.dependencies.sort(), [currentFile, shared].sort());
+  const diff = await compareLoaded(historical, working, binary);
+  assert.deepEqual(diff.operations.map(op => op.path), ['/current']);
+});
+
+test('missing historical directories outside Git do not report a Git failure', async t => {
+  const root = await folder(t);
+  assert.equal(await findGitRoot(path.join(root, 'removed', 'nested', 'api.json')), null);
 });

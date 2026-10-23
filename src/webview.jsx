@@ -136,6 +136,7 @@ function App() {
       // Installed-package tests click real controls instead of invoking Swagger internals.
       if (event.data.type === 'testInspect') send('viewState', { state: {
         theme: document.documentElement.dataset.theme,
+        error: document.querySelector('.api-error')?.textContent || '',
         changesOnly: document.querySelector('.api-tools input')?.checked,
         changesExpanded: Boolean(document.querySelector('.api-sidebar:not([hidden])')),
         operations: document.querySelectorAll('.swagger-ui .opblock').length,
