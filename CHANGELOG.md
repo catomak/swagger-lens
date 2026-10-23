@@ -12,6 +12,8 @@ Release descriptions come from the matching version section below. Editing rules
 - Open historical files inside removed or renamed directories by finding Git from the nearest existing parent; keep shared schemas tied to the selected revision.
 - Compare renamed path parameters correctly, preserving added/removed methods, revision-specific parameters, change descriptions, and nested highlights.
 
+- Normalize Git-root paths in Windows regression tests.
+
 ### Changed
 
 - Publish Marketplace packages through GitHub OIDC and Microsoft Entra ID, with an explicit retry of an existing release without rebuilding.

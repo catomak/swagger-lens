@@ -123,7 +123,7 @@ test('Git snapshots retain sibling schemas after their source directory is renam
   await fs.writeFile(shared, JSON.stringify(common));
 
   const gitRoot = await findGitRoot(historicalFile);
-  assert.equal(gitRoot, await fs.realpath(root));
+  assert.equal(path.normalize(gitRoot), await fs.realpath(root));
   const historical = await loadRevision(gitRoot, 'HEAD', 'Internal Services/Customer Profile (Raw draft)/api.json');
   const working = await loadWorking(currentFile);
   const schema = loaded => loaded.expanded.paths['/current'].get.responses['200'].content['application/json'].schema;
