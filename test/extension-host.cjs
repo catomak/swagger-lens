@@ -152,8 +152,13 @@ async function runTests() {
   for (const mode of ['preview', 'diff', 'preview']) {
     await api.setMode(missingIndex, mode);
     await waitFor(() => api.getPreview(missingIndex)?.ready && !api.getPreview(missingIndex)?.busy, 'Missing INDEX reference did not settle');
+    assert.match(api.getPreview(missingIndex).error, /common-errors\.json/);
     await api.inspectPreview(missingIndex);
-    await waitFor(() => api.getPreview(missingIndex).viewState, 'The real error panel did not respond');
+    await waitFor(async () => {
+      if (api.getPreview(missingIndex).viewState?.error.includes('common-errors.json')) return true;
+      await api.inspectPreview(missingIndex);
+      return false;
+    }, 'The reference error did not render');
     const state = api.getPreview(missingIndex);
     assert.equal(state.mode, mode);
     assert.match(state.viewState.error, /common-errors\.json/);

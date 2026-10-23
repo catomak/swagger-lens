@@ -4,6 +4,10 @@ Release descriptions come from the matching version section below. Editing rules
 
 ## Unreleased
 
+### Changed
+
+- Use a transparent icon background with a black circular outline and thinner braces and smile.
+
 ## 0.4.1 — 2026-10-24
 
 ### Fixed
@@ -12,7 +16,7 @@ Release descriptions come from the matching version section below. Editing rules
 - Open historical files inside removed or renamed directories by finding Git from the nearest existing parent; keep shared schemas tied to the selected revision.
 - Compare renamed path parameters correctly, preserving added/removed methods, revision-specific parameters, change descriptions, and nested highlights.
 
-- Normalize Git-root paths in Windows regression tests.
+- Normalize Git-root paths in Windows regression tests and wait for visible error text in asynchronous webview checks.
 
 ### Changed
 
